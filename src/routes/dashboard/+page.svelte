@@ -85,6 +85,12 @@
 		templateResult = '';
 		templateError = '';
 
+		if (!recipientPhone || !messageText) {
+			testError = 'Recipient phone and message text are required for sending messages.';
+			testing = false;
+			return;
+		}
+
 		try {
 			const res = await fetch('/api/test-message', {
 				method: 'POST',
@@ -132,7 +138,7 @@
 	<nav class="border-b border-slate-800 bg-slate-900/50 backdrop-blur-md sticky top-0 z-10">
 		<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
 			<div class="flex items-center space-x-2">
-				<div class="w-8 h-8 bg-cyan-600 rounded-lg flex items-center justify-center font-bold">B</div>
+				<img src="/favicon.svg" alt="Bhejna Logo" class="w-8 h-8" />
 				<span class="text-xl font-bold tracking-tight">Bhejna</span>
 			</div>
 			<div class="flex items-center space-x-4">
@@ -153,11 +159,29 @@
 				<div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-cyan-500"></div>
 			</div>
 		{:else}
+			<section class="bg-slate-900 border border-slate-800 rounded-2xl p-8 shadow-xl mb-8">
+				<header class="mb-6">
+					<h3 class="text-2xl font-bold text-white flex items-center">
+						<svg class="w-6 h-6 mr-2 text-[#25D366]" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+							<path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.414 0 .018 5.393 0 12.03c0 2.12.551 4.189 1.595 6.048L0 24l6.105-1.602a11.83 11.83 0 005.937 1.598h.005c6.637 0 12.032-5.395 12.035-12.032a11.762 11.762 0 00-3.528-8.508z"/>
+						</svg>
+						Embedded Signup (Recommended)
+					</h3>
+					<p class="text-slate-400 mt-2 text-sm">The fastest way to connect your WhatsApp Business Account. Use Meta's official onboarding flow.</p>
+				</header>
+				<a href="/dashboard/connect" class="w-full inline-flex items-center justify-center bg-[#25D366] hover:bg-[#128C7E] text-white font-bold py-4 rounded-xl transition-all shadow-lg shadow-green-900/30 active:scale-[0.98]">
+					<svg class="w-6 h-6 mr-2" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+						<path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.414 0 .018 5.393 0 12.03c0 2.12.551 4.189 1.595 6.048L0 24l6.105-1.602a11.83 11.83 0 005.937 1.598h.005c6.637 0 12.032-5.395 12.035-12.032a11.762 11.762 0 00-3.528-8.508z"/>
+					</svg>
+					Connect WhatsApp Account
+				</a>
+			</section>
+
 			<header class="mb-12">
 				<h2 class="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white to-slate-400">
-					Provision New Tenant
+					Manual Provisioning (Advanced)
 				</h2>
-				<p class="text-slate-400 mt-2">Connect your WhatsApp Business Account (WABA) to start dispatching.</p>
+				<p class="text-slate-400 mt-2">Connect your WhatsApp Business Account (WABA) manually if you already have the IDs.</p>
 			</header>
 
 			<section class="bg-slate-900 border border-slate-800 rounded-2xl p-8 shadow-xl">
@@ -317,7 +341,6 @@ if (hash === headers['x-bhejna-signature']) {'{'}
 							type="text"
 							id="recipient_phone"
 							bind:value={recipientPhone}
-							required
 							placeholder="e.g. 15551234567"
 							class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-cyan-500 outline-none transition-all"
 						/>
@@ -327,7 +350,6 @@ if (hash === headers['x-bhejna-signature']) {'{'}
 						<textarea
 							id="message_text"
 							bind:value={messageText}
-							required
 							rows="3"
 							placeholder="Hello from Bhejna API!"
 							class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-cyan-500 outline-none transition-all"

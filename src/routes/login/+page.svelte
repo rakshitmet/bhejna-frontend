@@ -34,6 +34,7 @@
 <div class="min-h-screen flex items-center justify-center bg-slate-950 p-4">
 	<div class="w-full max-w-md bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl p-8 space-y-6">
 		<div class="text-center">
+			<img src="/favicon.svg" alt="Bhejna Logo" class="w-16 h-16 mx-auto mb-4" />
 			<h1 class="text-3xl font-bold text-white tracking-tight">Bhejna</h1>
 			<p class="text-slate-400 mt-2">Control Plane Dashboard</p>
 		</div>

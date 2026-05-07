@@ -1,4 +1,5 @@
-import { fail, type ServerLoadEvent, type RequestEvent } from '@sveltejs/kit';
+import { fail } from '@sveltejs/kit';
+import type { ServerLoadEvent, RequestEvent } from '@sveltejs/kit';
 import { createClient } from '@supabase/supabase-js';
 import { PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_PUBLISHABLE_KEY } from '$env/static/public';
 import { randomBytes } from 'crypto';

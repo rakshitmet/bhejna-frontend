@@ -84,6 +84,7 @@
 
 <div class="min-h-screen bg-slate-950 flex items-center justify-center p-4">
 	<div class="w-full max-w-sm bg-slate-900 border border-slate-800 rounded-xl p-6 text-center">
+		<img src="/favicon.svg" alt="Bhejna Logo" class="w-12 h-12 mx-auto mb-4" />
 		<h2 class="text-xl font-bold text-white mb-2">Connect WhatsApp</h2>
 		<p class="text-slate-400 text-sm mb-6">
 			Link your WhatsApp Business Account securely to Bhejna.
