@@ -59,8 +59,11 @@
 			const data = await response.json();
 
 			if (!response.ok) throw new Error(data.message || 'Provisioning failed');
-
-			apiKey = data.apiKey;
+			
+			apiKey = data.api_key;
+			// Clear fields on success
+			waba_id = '';
+			phone_number_id = '';
 		} catch (err: any) {
 			error = err.message;
 		} finally {
