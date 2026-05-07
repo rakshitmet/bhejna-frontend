@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { onMount, onDestroy } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { PUBLIC_META_APP_ID, PUBLIC_META_CONFIG_ID } from '$env/static/public';
 
@@ -7,7 +7,33 @@
 	let connecting = $state(false);
 	let error = $state('');
 
+	const sessionInfoListener = (event: MessageEvent) => {
+		if (event.origin !== "https://www.facebook.com") return;
+		try {
+			const data = JSON.parse(event.data);
+			if (data.type === 'WA_EMBEDDED_SIGNUP') {
+				// if user finishes the flow
+				if (data.event === 'FINISH') {
+					const { waba_id, phone_number_id } = data.data;
+					if (waba_id && phone_number_id) {
+						provisionTenant(waba_id, phone_number_id);
+					}
+				}
+				// if user cancels the flow
+				else if (data.event === 'CANCEL') {
+					const { error_message } = data.data;
+					error = error_message || 'User cancelled the flow.';
+					connecting = false;
+				}
+			}
+		} catch (e) {
+			// Ignore non-JSON messages
+		}
+	};
+
 	onMount(() => {
+		window.addEventListener("message", sessionInfoListener);
+
 		// Asynchronously load the Facebook SDK
 		window.fbAsyncInit = function() {
 			window.FB.init({
@@ -30,6 +56,12 @@
 		}(document, 'script', 'facebook-jssdk'));
 	});
 
+	onDestroy(() => {
+		if (typeof window !== 'undefined') {
+			window.removeEventListener("message", sessionInfoListener);
+		}
+	});
+
 	function handleConnect() {
 		connecting = true;
 		error = '';
@@ -37,8 +69,8 @@
 		window.FB.login(
 			(response: any) => {
 				if (response.authResponse) {
-					const accessToken = response.authResponse.accessToken;
-					exchangeToken(accessToken);
+					// With response_type: 'code', the authResponse will contain a 'code'
+					// and IDs are extracted via the window message listener.
 				} else {
 					connecting = false;
 					error = 'User cancelled login or did not fully authorize.';
@@ -46,6 +78,8 @@
 			},
 			{
 				config_id: PUBLIC_META_CONFIG_ID,
+				response_type: 'code',
+				override_default_response_type: true,
 				scope: 'whatsapp_business_management,whatsapp_business_messaging',
 				extinfo: { setup: {} },
 				feature: 'whatsapp_embedded_signup'
@@ -53,20 +87,20 @@
 		);
 	}
 
-	async function exchangeToken(accessToken: string) {
+	async function provisionTenant(waba_id: string, phone_number_id: string) {
 		try {
 			const res = await fetch('/api/ess-exchange', {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json'
 				},
-				body: JSON.stringify({ accessToken })
+				body: JSON.stringify({ waba_id, phone_number_id })
 			});
 
 			const data = await res.json();
 
 			if (!res.ok) {
-				throw new Error(data.message || 'Token exchange failed');
+				throw new Error(data.message || 'Provisioning failed');
 			}
 
 			// On success, redirect back to dashboard
@@ -109,7 +143,7 @@
 		{/if}
 
 		{#if error}
-			<div class="mt-4 p-3 bg-red-900/20 border border-red-900/50 rounded-lg text-red-400 text-xs">
+			<div class="mt-4 p-3 bg-red-900/20 border border-red-900/50 rounded-xl text-red-400 text-xs">
 				{error}
 			</div>
 		{/if}
