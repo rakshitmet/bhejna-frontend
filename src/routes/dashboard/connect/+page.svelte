@@ -19,24 +19,34 @@
 	});
 
 	const sessionInfoListener = (event: MessageEvent) => {
-		// Securely check origin
-		if (event.origin !== "https://www.facebook.com" && event.origin !== "https://web.facebook.com") return;
+		// Robust origin check based on official recommendation
+		if (!event.origin.endsWith('facebook.com')) return;
 		
 		try {
 			const data = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
 			if (data.type === 'WA_EMBEDDED_SIGNUP') {
+				console.log('ESS Message Event:', data);
+				
 				if (data.event === 'FINISH') {
+					// Successful completion
 					const { waba_id: id, phone_number_id: phoneId } = data.data;
 					waba_id = id;
 					phone_number_id = phoneId;
-					console.log('Captured IDs from message:', { waba_id, phone_number_id });
 				} else if (data.event === 'CANCEL') {
-					error = 'Signup cancelled by user.';
+					// User abandoned or error occurred
+					const { current_step, error_message } = data.data;
+					if (error_message) {
+						error = `Meta Error: ${error_message}`;
+					} else if (current_step) {
+						error = `Flow abandoned at step: ${current_step}`;
+					} else {
+						error = 'Signup cancelled by user.';
+					}
 					connecting = false;
 				}
 			}
 		} catch (e) {
-			// Ignore non-JSON or invalid messages
+			// Ignore non-JSON messages
 		}
 	};
 
@@ -46,6 +56,7 @@
 		window.fbAsyncInit = function() {
 			window.FB.init({
 				appId: PUBLIC_META_APP_ID,
+				autoLogAppEvents: true,
 				cookie: true,
 				xfbml: true,
 				version: 'v25.0'
