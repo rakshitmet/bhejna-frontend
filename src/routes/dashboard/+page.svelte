@@ -21,6 +21,10 @@
 	let testResult = $state('');
 	let testError = $state('');
 
+	let creatingTemplate = $state(false);
+	let templateResult = $state('');
+	let templateError = $state('');
+
 	onMount(async () => {
 		const { data: { session } } = await supabase.auth.getSession();
 		if (!session) {
@@ -78,6 +82,8 @@
 		testing = true;
 		testResult = '';
 		testError = '';
+		templateResult = '';
+		templateError = '';
 
 		try {
 			const res = await fetch('/api/test-message', {
@@ -95,6 +101,29 @@
 			testError = err.message;
 		} finally {
 			testing = false;
+		}
+	}
+
+	async function handleCreateTemplate() {
+		creatingTemplate = true;
+		templateResult = '';
+		templateError = '';
+		testResult = '';
+		testError = '';
+
+		try {
+			const res = await fetch('/api/create-template', {
+				method: 'POST'
+			});
+
+			const resData = await res.json();
+			if (!res.ok) throw new Error(resData.message || 'Failed to create template');
+
+			templateResult = `Template Created! ID: ${resData.id}`;
+		} catch (err: any) {
+			templateError = err.message;
+		} finally {
+			creatingTemplate = false;
 		}
 	}
 </script>
@@ -305,30 +334,46 @@ if (hash === headers['x-bhejna-signature']) {'{'}
 						></textarea>
 					</div>
 
-					<button
-						type="submit"
-						disabled={testing}
-						class="w-full bg-cyan-600 hover:bg-cyan-500 text-white font-semibold py-3 rounded-xl transition-all shadow-md active:scale-[0.98] disabled:opacity-50 flex items-center justify-center"
-					>
-						{#if testing}
-							<svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-							Sending...
-						{:else}
-							Send Test Message
-						{/if}
-					</button>
+					<div class="flex flex-col sm:flex-row gap-4">
+						<button
+							type="submit"
+							disabled={testing || creatingTemplate}
+							class="flex-1 bg-cyan-600 hover:bg-cyan-500 text-white font-semibold py-3 rounded-xl transition-all shadow-md active:scale-[0.98] disabled:opacity-50 flex items-center justify-center"
+						>
+							{#if testing}
+								<svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+								Sending...
+							{:else}
+								Send Test Message
+							{/if}
+						</button>
+
+						<button
+							type="button"
+							onclick={handleCreateTemplate}
+							disabled={creatingTemplate || testing}
+							class="flex-1 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white font-semibold py-3 rounded-xl transition-all shadow-md active:scale-[0.98] disabled:opacity-50 flex items-center justify-center"
+						>
+							{#if creatingTemplate}
+								<svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+								Creating...
+							{:else}
+								Create Test Template
+							{/if}
+						</button>
+					</div>
 				</form>
 
-				{#if testError}
+				{#if testError || templateError}
 					<div class="mt-4 p-4 bg-red-900/20 border border-red-900/50 rounded-xl text-red-400 text-sm">
-						{testError}
+						{testError || templateError}
 					</div>
 				{/if}
 
-				{#if testResult}
+				{#if testResult || templateResult}
 					<div class="mt-4 p-4 bg-green-900/20 border border-green-900/50 rounded-xl text-green-400 text-sm font-mono flex items-center">
 						<svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-						{testResult}
+						{testResult || templateResult}
 					</div>
 				{/if}
 			</section>
