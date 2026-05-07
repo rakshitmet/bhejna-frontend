@@ -27,7 +27,7 @@
 			if (data.type === 'WA_EMBEDDED_SIGNUP') {
 				console.log('ESS Message Event:', data);
 				
-				if (data.event === 'FINISH') {
+				if (data.event === 'FINISH_WHATSAPP_BUSINESS_APP_ONBOARDING' || data.event === 'FINISH') {
 					// Successful completion
 					const { waba_id: id, phone_number_id: phoneId } = data.data;
 					waba_id = id;
@@ -102,14 +102,8 @@
 			response_type: 'code',
 			override_default_response_type: true,
 			extras: {
-				"version": "v4",
-				"setup": {
-					"business": { "id": null, "name": null, "email": null, "phone": { "code": null, "number": null }, "website": null, "address": { "streetAddress1": null, "streetAddress2": null, "city": null, "state": null, "zipPostal": null, "country": null }, "timezone": null },
-					"phone": { "displayName": null, "category": null, "description": null },
-					"preVerifiedPhone": { "ids": null },
-					"solutionID": null,
-					"whatsAppBusinessAccount": { "ids": null }
-				}
+				sessionInfoVersion: 3,
+				featureType: 'whatsapp_business_app_onboarding'
 			}
 		});
 	}
