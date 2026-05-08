@@ -6,7 +6,7 @@ import crypto from 'crypto';
 
 export const POST = async ({ request, cookies }: RequestEvent): Promise<Response> => {
 	try {
-		const { waba_id, phone_number_id } = await request.json();
+		const { waba_id, phone_number_id, system_token } = await request.json();
 
 		if (!waba_id || !phone_number_id) {
 			return json({ message: 'Missing WABA ID or Phone Number ID' }, { status: 400 });
@@ -34,7 +34,7 @@ export const POST = async ({ request, cookies }: RequestEvent): Promise<Response
 		}
 
 		// 2. Generate a secure API Key
-		const generatedKey = 'nxt_live_' + crypto.randomBytes(32).toString('hex');
+		const generatedApiKey = 'nxt_live_' + crypto.randomBytes(32).toString('hex');
 
 		// 3. Upsert into the tenants table
 		// Requirement: Use phone_number_id as conflict target
@@ -44,7 +44,7 @@ export const POST = async ({ request, cookies }: RequestEvent): Promise<Response
 				user_id: user.id,
 				waba_id,
 				phone_number_id,
-				api_key: generatedKey
+				api_key: generatedApiKey
 			}, {
 				onConflict: 'phone_number_id'
 			});
@@ -65,9 +65,11 @@ export const POST = async ({ request, cookies }: RequestEvent): Promise<Response
 				'Content-Type': 'application/json'
 			},
 			body: JSON.stringify({
-				access_token: generatedKey,
+				tenant_id: user.id,
 				waba_id,
-				phone_number_id
+				phone_number_id,
+				system_token,
+				api_key: generatedApiKey
 			})
 		});
 
@@ -80,7 +82,7 @@ export const POST = async ({ request, cookies }: RequestEvent): Promise<Response
 		// 5. Return success with the key
 		return json({
 			success: true,
-			api_key: generatedKey
+			api_key: generatedApiKey
 		});
 
 	} catch (error: any) {
