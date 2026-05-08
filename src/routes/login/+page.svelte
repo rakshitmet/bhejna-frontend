@@ -79,13 +79,19 @@
 			</p>
 		{/if}
 
-		<div class="text-center pt-4 border-t border-slate-800">
+		<div class="text-center pt-4 border-t border-slate-800 space-y-3">
 			<button
 				onclick={() => (isSignUp = !isSignUp)}
-				class="text-sm text-slate-400 hover:text-cyan-400 transition-colors underline underline-offset-4"
+				class="w-full text-sm text-slate-400 hover:text-cyan-400 transition-colors underline underline-offset-4"
 			>
 				{isSignUp ? 'Already have an account? Sign In' : "Don't have an account? Sign Up"}
 			</button>
+			<div class="pt-2">
+				<a href="/docs" class="text-xs text-slate-500 hover:text-slate-300 transition-colors flex items-center justify-center">
+					<svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+					View API Documentation
+				</a>
+			</div>
 		</div>
 	</div>
 </div>

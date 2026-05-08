@@ -115,7 +115,8 @@
 				<img src="/favicon.svg" alt="Bhejna Logo" class="w-8 h-8" />
 				<span class="text-xl font-bold tracking-tight">Bhejna</span>
 			</div>
-			<div class="flex items-center space-x-4">
+			<div class="flex items-center space-x-6">
+				<a href="/docs" class="text-sm font-medium text-slate-400 hover:text-white transition-colors">Documentation</a>
 				<span class="text-sm text-slate-400 hidden sm:inline">{userEmail}</span>
 				<button
 					onclick={signOut}
