@@ -41,7 +41,9 @@ export const POST = async ({ request, cookies }: RequestEvent): Promise<Response
 			return json({ message: 'Tenant configuration not found' }, { status: 404 });
 		}
 
-		// Proxy request to the Go backend infrastructure
+		// 4. Proxy request to the Go backend infrastructure
+		const cleanPhone = recipient_phone.replace(/^\+|^00/, '');
+		
 		const response = await fetch(`${BHEJNA_GO_BACKEND_URL}/v1/messages`, {
 			method: 'POST',
 			headers: {
@@ -49,21 +51,22 @@ export const POST = async ({ request, cookies }: RequestEvent): Promise<Response
 				'Authorization': `Bearer ${tenant.api_key}`
 			},
 			body: JSON.stringify({
-				recipient_phone: recipient_phone,
+				messaging_product: "whatsapp",
+				to: cleanPhone,
 				type: "template",
 				template: {
 					name: "hello_world",
-					language: { code: "en_US" }
+					language: {
+						code: "en_US"
+					}
 				}
 			})
 		});
 
 		if (!response.ok) {
-			const errorData = await response.json().catch(() => ({}));
-			return json(
-				{ message: errorData.error || 'Failed to send message via Go Backend' },
-				{ status: response.status }
-			);
+			const errorText = await response.text();
+			console.error(`Go Validation Error: ${errorText}`);
+			return json({ error: errorText }, { status: response.status });
 		}
 
 		const data = await response.json();
