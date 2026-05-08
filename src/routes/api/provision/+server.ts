@@ -56,7 +56,7 @@ export const POST = async ({ request, cookies }: RequestEvent): Promise<Response
 
 		// 4. Notify Go backend about new tenant for sync
 		// Construct URL, ensuring no double slashes
-		const syncUrl = new URL('/internal/tenant', BHEJNA_GO_BACKEND_URL).toString();
+		const syncUrl = new URL('/v1/internal/tenant', BHEJNA_GO_BACKEND_URL).toString();
 		
 		const syncResponse = await fetch(syncUrl, {
 			method: 'POST',
