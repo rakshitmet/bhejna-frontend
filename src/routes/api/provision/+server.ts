@@ -1,5 +1,6 @@
 import { json, type RequestEvent } from '@sveltejs/kit';
 import { PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_PUBLISHABLE_KEY } from '$env/static/public';
+import { BHEJNA_GO_BACKEND_URL, BHEJNA_INTERNAL_SECRET } from '$env/static/private';
 import { createClient } from '@supabase/supabase-js';
 import crypto from 'crypto';
 
@@ -53,7 +54,33 @@ export const POST = async ({ request, cookies }: RequestEvent): Promise<Response
 			return json({ message: upsertError.message || 'Failed to provision tenant' }, { status: 500 });
 		}
 
-		// 4. Return success with the key
+		// 4. Notify Go backend about new tenant for sync
+		try {
+			// Construct URL, ensuring no double slashes
+			const syncUrl = new URL('/internal/tenant', BHEJNA_GO_BACKEND_URL).toString();
+			
+			const syncResponse = await fetch(syncUrl, {
+				method: 'POST',
+				headers: {
+					'Authorization': `Bearer ${BHEJNA_INTERNAL_SECRET}`,
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({
+					access_token: generatedKey,
+					waba_id,
+					phone_number_id
+				})
+			});
+
+			if (!syncResponse.ok) {
+				const errorText = await syncResponse.text();
+				console.error(`Go backend sync failed with status ${syncResponse.status}: ${errorText}`);
+			}
+		} catch (syncError) {
+			console.error('Failed to communicate with Go backend for tenant sync:', syncError);
+		}
+
+		// 5. Return success with the key
 		return json({
 			success: true,
 			api_key: generatedKey
