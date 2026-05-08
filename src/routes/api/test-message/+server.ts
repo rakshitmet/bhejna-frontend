@@ -51,13 +51,14 @@ export const POST = async ({ request, cookies }: RequestEvent): Promise<Response
 				'Authorization': `Bearer ${tenant.api_key}`
 			},
 			body: JSON.stringify({
-				messaging_product: "whatsapp",
-				to: cleanPhone,
-				type: "template",
-				template: {
-					name: "hello_world",
-					language: {
-						code: "en_US"
+				recipient: cleanPhone,
+				message_type: "template",
+				payload: {
+					template: {
+						name: "hello_world",
+						language: {
+							code: "en_US"
+						}
 					}
 				}
 			})
