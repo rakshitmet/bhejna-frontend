@@ -55,29 +55,26 @@ export const POST = async ({ request, cookies }: RequestEvent): Promise<Response
 		}
 
 		// 4. Notify Go backend about new tenant for sync
-		try {
-			// Construct URL, ensuring no double slashes
-			const syncUrl = new URL('/internal/tenant', BHEJNA_GO_BACKEND_URL).toString();
-			
-			const syncResponse = await fetch(syncUrl, {
-				method: 'POST',
-				headers: {
-					'Authorization': `Bearer ${BHEJNA_INTERNAL_SECRET}`,
-					'Content-Type': 'application/json'
-				},
-				body: JSON.stringify({
-					access_token: generatedKey,
-					waba_id,
-					phone_number_id
-				})
-			});
+		// Construct URL, ensuring no double slashes
+		const syncUrl = new URL('/internal/tenant', BHEJNA_GO_BACKEND_URL).toString();
+		
+		const syncResponse = await fetch(syncUrl, {
+			method: 'POST',
+			headers: {
+				'Authorization': `Bearer ${BHEJNA_INTERNAL_SECRET}`,
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({
+				access_token: generatedKey,
+				waba_id,
+				phone_number_id
+			})
+		});
 
-			if (!syncResponse.ok) {
-				const errorText = await syncResponse.text();
-				console.error(`Go backend sync failed with status ${syncResponse.status}: ${errorText}`);
-			}
-		} catch (syncError) {
-			console.error('Failed to communicate with Go backend for tenant sync:', syncError);
+		if (!syncResponse.ok) {
+			const errorText = await syncResponse.text();
+			console.error(`Failed to sync tenant with Go backend. URL: ${syncUrl}, Status: ${syncResponse.status}, Response: ${errorText}`);
+			return json({ message: 'Failed to synchronize tenant with backend infrastructure' }, { status: 500 });
 		}
 
 		// 5. Return success with the key

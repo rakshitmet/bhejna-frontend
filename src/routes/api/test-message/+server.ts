@@ -17,10 +17,10 @@ function getSupabase(cookies: any) {
 
 export const POST = async ({ request, cookies }: RequestEvent): Promise<Response> => {
 	try {
-		const { recipient_phone, message_text } = await request.json();
+		const { recipient_phone } = await request.json();
 
-		if (!recipient_phone || !message_text) {
-			return json({ message: 'Missing recipient_phone or message_text' }, { status: 400 });
+		if (!recipient_phone) {
+			return json({ message: 'Missing recipient_phone' }, { status: 400 });
 		}
 
 		const supabase = getSupabase(cookies);
@@ -49,9 +49,12 @@ export const POST = async ({ request, cookies }: RequestEvent): Promise<Response
 				'Authorization': `Bearer ${tenant.api_key}`
 			},
 			body: JSON.stringify({
-				type: "text",
-				to: recipient_phone,
-				body: message_text
+				recipient_phone: recipient_phone,
+				type: "template",
+				template: {
+					name: "hello_world",
+					language: { code: "en_US" }
+				}
 			})
 		});
 
