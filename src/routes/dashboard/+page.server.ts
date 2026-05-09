@@ -41,45 +41,30 @@ export const actions = {
         const webhook_url = formData.get('webhook_url')?.toString() || '';
 
         // 1. Validation: Extract and validate HTTPS URL
-        if (!webhook_url) {
-            return fail(400, { error: 'Webhook URL is required', webhook_url });
-        }
-
-        if (!webhook_url.startsWith('https://')) {
-            return fail(400, { error: 'Webhook URL must use https:// for security', webhook_url });
-        }
-
-        try {
-            new URL(webhook_url);
-        } catch {
-            return fail(400, { error: 'Invalid Webhook URL format', webhook_url });
+        if (!webhook_url || !webhook_url.startsWith('https://')) {
+            return fail(400, { error: 'A valid https:// Webhook URL is required', webhook_url });
         }
 
         const supabase = getSupabase(cookies);
         const { data: { user } } = await supabase.auth.getUser();
 
         if (!user) {
-            return fail(401, { error: 'Unauthorized. Please sign in again.' });
+            return fail(401, { error: 'Unauthorized' });
         }
 
-        // Fetch existing tenant to check for secret and get IDs
-        const { data: existingTenant, error: fetchError } = await supabase
+        // Fetch existing tenant to check for secret
+        const { data: existingTenant } = await supabase
             .from('tenants')
-            .select('*')
+            .select('webhook_secret')
             .eq('user_id', user.id)
             .single();
 
-        if (fetchError || !existingTenant) {
-            return fail(404, { error: 'Tenant record not found. Please provision your account first.' });
-        }
-
-        // 2. Secret Generation: Only if not already present
-        let webhook_secret = existingTenant.webhook_secret;
+        let webhook_secret = existingTenant?.webhook_secret;
         if (!webhook_secret) {
             webhook_secret = randomBytes(16).toString('hex'); // 32-character random hex string
         }
 
-        // 3. Database Update (Source of Truth)
+        // 2. Strict Update: Chain .select().single() to query
         const { data: updatedTenant, error: updateError } = await supabase
             .from('tenants')
             .update({ webhook_url, webhook_secret })
@@ -87,22 +72,19 @@ export const actions = {
             .select()
             .single();
 
+        // Error Handling: Halt and throw error if Supabase write fails
         if (updateError) {
             console.error("Supabase Update Failed:", updateError);
-            return fail(500, { error: "Database update failed: " + updateError.message });
+            return fail(500, { error: "Database update failed" });
         }
 
-        if (!updatedTenant) {
-            return fail(500, { error: 'Failed to verify updated tenant record' });
-        }
-
-        // 4. Edge Cache Hydration (Critical)
+        // 3. Go Hydration: Construct payload using the strictly returned 'updatedTenant' row
         try {
             const syncUrl = new URL('/v1/internal/tenant', BHEJNA_GO_BACKEND_URL).toString();
             const syncResponse = await fetch(syncUrl, {
                 method: 'POST',
                 headers: {
-                    'Authorization': `Bearer ${BHEJNA_INTERNAL_SECRET}`, // Using INTERNAL_SECRET as the SYSTEM_TOKEN
+                    'Authorization': `Bearer ${BHEJNA_INTERNAL_SECRET}`,
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
@@ -117,12 +99,12 @@ export const actions = {
 
             if (!syncResponse.ok) {
                 const errorText = await syncResponse.text();
-                console.error(`Edge Cache Sync Failed: ${syncResponse.status} - ${errorText}`);
-                return fail(500, { error: 'Failed to synchronize settings with edge cache. Please try again.' });
+                console.error(`Edge Cache Hydration Failed: ${syncResponse.status} - ${errorText}`);
+                return fail(500, { error: "Infrastructure synchronization failed. Please retry again after few minutes." });
             }
         } catch (syncErr: any) {
-            console.error('Edge Cache Sync Error:', syncErr);
-            return fail(500, { error: 'Infrastructure synchronization error' });
+            console.error('Edge Cache Hydration Error:', syncErr);
+            return fail(500, { error: "Failed to communicate with backend infrastructure. Please retry again after few minutes." });
         }
 
         return { 
