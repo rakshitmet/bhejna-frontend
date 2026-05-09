@@ -17,6 +17,7 @@
 	// API Playground state
 	let recipientPhone = $state('');
 	let testing = $state(false);
+	let updatingWebhook = $state(false);
 	let testResult = $state('');
 	let testError = $state('');
 
@@ -238,7 +239,18 @@
 					<p class="text-slate-400 mt-2 text-sm">Configure Client Webhook Egress for asynchronous WhatsApp status updates.</p>
 				</header>
 
-				<form method="POST" action="?/updateWebhook" use:enhance class="space-y-6">
+				<form 
+					method="POST" 
+					action="?/updateWebhook" 
+					use:enhance={() => {
+						updatingWebhook = true;
+						return async ({ update }) => {
+							updatingWebhook = false;
+							await update();
+						};
+					}} 
+					class="space-y-6"
+				>
 					<div>
 						<label for="webhook_url" class="block text-sm font-medium text-slate-300 mb-2">Webhook URL</label>
 						<input
@@ -254,11 +266,19 @@
 
 					<button
 						type="submit"
-						class="w-full bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white font-semibold py-3 rounded-xl transition-all shadow-md active:scale-[0.98]"
+						disabled={updatingWebhook}
+						class="w-full bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-3 rounded-xl transition-all shadow-lg shadow-cyan-900/30 active:scale-[0.98] disabled:opacity-50"
 					>
-						Save Webhook Settings
+						{updatingWebhook ? 'Saving Settings...' : 'Save Webhook Settings'}
 					</button>
 				</form>
+
+				{#if form?.success}
+					<div class="mt-4 p-4 bg-green-900/20 border border-green-900/50 rounded-xl text-green-400 text-sm flex items-center">
+						<svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+						Settings updated and synchronized successfully.
+					</div>
+				{/if}
 
 				{#if form?.error}
 					<div class="mt-4 p-4 bg-red-900/20 border border-red-900/50 rounded-xl text-red-400 text-sm">
