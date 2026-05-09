@@ -4,11 +4,11 @@
 	import { goto } from '$app/navigation';
 	import { enhance } from '$app/forms';
 
-	let { data, form }: { data: { tenant: any }, form: any } = $props();
+	let { data, form } = $props();
 
-	let loading = $state(true);
+	let loading = $state(false);
 	let provisioning = $state(false);
-	let userEmail = $state('');
+	let userEmail = $derived(data.session?.user?.email || '');
 	let waba_id = $state('');
 	let phone_number_id = $state('');
 	let apiKey = $state('');
@@ -23,17 +23,7 @@
 	let copiedSecret = $state(false);
 	let showSecret = $state(false);
 
-	onMount(async () => {
-		const { data: { session } } = await supabase.auth.getSession();
-		if (!session) {
-			goto('/login');
-		} else {
-			userEmail = session.user.email || '';
-			// Set cookie for server-side actions
-			document.cookie = `sb-access-token=${session.access_token}; path=/; max-age=3600; SameSite=Lax; secure`;
-			loading = false;
-		}
-	});
+
 
 	async function copySecretToClipboard(secret: string | undefined) {
 		if (secret) {
@@ -71,10 +61,7 @@
 		}
 	}
 
-	async function signOut() {
-		await supabase.auth.signOut();
-		goto('/login');
-	}
+
 
 	function copyToClipboard() {
 		navigator.clipboard.writeText(apiKey);
@@ -123,12 +110,14 @@
 			<div class="flex items-center space-x-6">
 				<a href="/docs" class="text-sm font-medium text-slate-400 hover:text-white transition-colors">Documentation</a>
 				<span class="text-sm text-slate-400 hidden sm:inline">{userEmail}</span>
-				<button
-					onclick={signOut}
-					class="text-sm bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded-lg transition-colors"
-				>
-					Sign Out
-				</button>
+				<form method="POST" action="/dashboard?/signout" use:enhance>
+					<button
+						type="submit"
+						class="text-sm bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded-lg transition-colors"
+					>
+						Sign Out
+					</button>
+				</form>
 			</div>
 		</div>
 	</nav>

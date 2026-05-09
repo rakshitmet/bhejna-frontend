@@ -11,6 +11,7 @@ declare global {
 		}
 		interface PageData {
 			session: Session | null;
+			cookies: { name: string; value: string }[];
 		}
 		// interface PageState {}
 		// interface Platform {}

@@ -19,7 +19,7 @@
 		 * +layout.ts load function and forces the cookies to sync with the server.
 		 */
 		const { data: { subscription } } = supabase.auth.onAuthStateChange((event, _session) => {
-			if (_session?.expires_at !== session?.expires_at) {
+			if (_session?.access_token !== session?.access_token) {
 				invalidate('supabase:auth');
 			}
 		});

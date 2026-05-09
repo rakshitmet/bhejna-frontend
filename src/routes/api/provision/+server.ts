@@ -1,92 +1,84 @@
-import { json, type RequestEvent } from '@sveltejs/kit';
-import { PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_PUBLISHABLE_KEY } from '$env/static/public';
+import { json } from '@sveltejs/kit';
+import type { RequestEvent } from './$types';
 import { BHEJNA_GO_BACKEND_URL, BHEJNA_INTERNAL_SECRET } from '$env/static/private';
-import { createClient } from '@supabase/supabase-js';
 import crypto from 'crypto';
 
-export const POST = async ({ request, cookies }: RequestEvent): Promise<Response> => {
-	try {
-		const { waba_id, phone_number_id, system_token } = await request.json();
+export const POST = async ({ request, locals }: RequestEvent): Promise<Response> => {
+    // 1. Auth Guard: Use the pre-verified session from our hooks
+    const { session, user } = await locals.safeGetSession();
 
-		if (!waba_id || !phone_number_id) {
-			return json({ message: 'Missing WABA ID or Phone Number ID' }, { status: 400 });
-		}
+    if (!session || !user) {
+        return json({ error: 'Unauthorized' }, { status: 401 });
+    }
 
-		// 1. Retrieve auth context from cookies
-		const token = cookies.get('sb-access-token');
-		if (!token) {
-			return json({ message: 'Unauthorized, no auth context found' }, { status: 401 });
-		}
+    try {
+        // 2. Parse Request: Extract waba_id and phone_number_id
+        const { waba_id, phone_number_id } = await request.json();
 
-		// Create a Supabase client bound to the user's token
-		const supabaseClient = createClient(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_PUBLISHABLE_KEY, {
-			global: {
-				headers: {
-					Authorization: `Bearer ${token}`
-				}
-			}
-		});
+        if (!waba_id || !phone_number_id) {
+            return json({ message: 'Missing WABA ID or Phone Number ID' }, { status: 400 });
+        }
 
-		// Get current user to ensure we have their ID
-		const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
-		if (userError || !user) {
-			return json({ message: 'Failed to verify user session' }, { status: 401 });
-		}
+        // 3. Generate Key: Secure key prefixed with nxt_live_
+        const apiKey = 'nxt_live_' + crypto.randomUUID().replace(/-/g, '');
 
-		// 2. Generate a secure API Key
-		const generatedApiKey = 'nxt_live_' + crypto.randomBytes(32).toString('hex');
+        // 4. Strict RLS Database Insert
+        // CRITICAL: We MUST include user_id to satisfy the Supabase INSERT policy.
+        const { data: newTenant, error: insertError } = await locals.supabase
+            .from('tenants')
+            .insert({
+                user_id: user.id,
+                waba_id,
+                phone_number_id,
+                api_key: apiKey
+            })
+            .select()
+            .single();
 
-		// 3. Upsert into the tenants table
-		// Requirement: Use phone_number_id as conflict target
-		const { error: upsertError } = await supabaseClient
-			.from('tenants')
-			.upsert({
-				user_id: user.id,
-				waba_id,
-				phone_number_id,
-				api_key: generatedApiKey
-			}, {
-				onConflict: 'phone_number_id'
-			});
+        if (insertError || !newTenant) {
+            console.error('Manual Provisioning Database Error:', JSON.stringify(insertError, null, 2));
+            return json({ message: 'Failed to create tenant record' }, { status: 500 });
+        }
 
-		if (upsertError) {
-			console.error('Manual Provisioning Error:', upsertError);
-			return json({ message: upsertError.message || 'Failed to provision tenant' }, { status: 500 });
-		}
+        // 5. Go Backend Hydration (The 500 Fix)
+        // CRITICAL MAPPING: Map api_key to access_token.
+        // FALLBACK: Go panics on null strings. Fallback to empty strings.
+        const goPayload = {
+            id: newTenant.id,
+            waba_id: newTenant.waba_id,
+            phone_number_id: newTenant.phone_number_id,
+            access_token: newTenant.api_key,
+            webhook_url: newTenant.webhook_url || "",
+            webhook_secret: newTenant.webhook_secret || ""
+        };
 
-		// 4. Notify Go backend about new tenant for sync
-		// Construct URL, ensuring no double slashes
-		const syncUrl = new URL('/v1/internal/tenant', BHEJNA_GO_BACKEND_URL).toString();
-		
-		const syncResponse = await fetch(syncUrl, {
-			method: 'POST',
-			headers: {
-				'Authorization': `Bearer ${BHEJNA_INTERNAL_SECRET}`,
-				'Content-Type': 'application/json'
-			},
-			body: JSON.stringify({
-				tenant_id: user.id,
-				waba_id,
-				phone_number_id,
-				system_token,
-				api_key: generatedApiKey
-			})
-		});
+        const syncUrl = new URL('/v1/internal/tenant', BHEJNA_GO_BACKEND_URL).toString();
+        
+        try {
+            const syncResponse = await fetch(syncUrl, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${BHEJNA_INTERNAL_SECRET}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(goPayload)
+            });
 
-		if (!syncResponse.ok) {
-			const errorText = await syncResponse.text();
-			console.error(`Failed to sync tenant with Go backend. URL: ${syncUrl}, Status: ${syncResponse.status}, Response: ${errorText}`);
-			return json({ message: 'Failed to synchronize tenant with backend infrastructure' }, { status: 500 });
-		}
+            if (!syncResponse.ok) {
+                const errorText = await syncResponse.text();
+                console.error(`Go Backend Sync Failed: ${syncResponse.status} - ${errorText}`);
+                return json({ message: 'Infrastructure synchronization failed' }, { status: 500 });
+            }
+        } catch (fetchError) {
+            console.error('Data Plane Connection Error:', fetchError);
+            return json({ message: 'Infrastructure connection failure' }, { status: 503 });
+        }
 
-		// 5. Return success with the key
-		return json({
-			success: true,
-			api_key: generatedApiKey
-		});
+        // 6. Return Success
+        return json({ tenant: newTenant });
 
-	} catch (error: any) {
-		console.error('Provisioning API Error:', error);
-		return json({ message: 'Internal Server Error' }, { status: 500 });
-	}
+    } catch (err: any) {
+        console.error('Provisioning internal error:', err);
+        return json({ message: 'Internal Server Error' }, { status: 500 });
+    }
 };

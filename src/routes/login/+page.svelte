@@ -1,34 +1,11 @@
 <script lang="ts">
-	import { supabase } from '$lib/supabase';
-	import { goto } from '$app/navigation';
+	import { enhance } from '$app/forms';
+	import type { ActionData, PageData } from './$types';
 
-	let email = $state('');
-	let password = $state('');
+	let { data, form }: { data: PageData, form: ActionData } = $props();
+	
 	let loading = $state(false);
-	let message = $state('');
 	let isSignUp = $state(false);
-
-	async function handleAuth(e: SubmitEvent) {
-		e.preventDefault();
-		loading = true;
-		message = '';
-
-		try {
-			if (isSignUp) {
-				const { error } = await supabase.auth.signUp({ email, password });
-				if (error) throw error;
-				message = 'Check your email for the confirmation link!';
-			} else {
-				const { error } = await supabase.auth.signInWithPassword({ email, password });
-				if (error) throw error;
-				goto('/dashboard');
-			}
-		} catch (error: any) {
-			message = error.message;
-		} finally {
-			loading = false;
-		}
-	}
 </script>
 
 <div class="min-h-screen flex items-center justify-center bg-slate-950 p-4">
@@ -39,13 +16,24 @@
 			<p class="text-slate-400 mt-2">Control Plane Dashboard</p>
 		</div>
 
-		<form onsubmit={handleAuth} class="space-y-4">
+		<form 
+			method="POST" 
+			use:enhance={() => {
+				loading = true;
+				return async ({ update }) => {
+					loading = false;
+					update();
+				};
+			}} 
+			class="space-y-4"
+		>
 			<div>
 				<label for="email" class="block text-sm font-medium text-slate-300 mb-1">Email Address</label>
 				<input
 					type="email"
 					id="email"
-					bind:value={email}
+					name="email"
+					value={form?.email ?? ''}
 					required
 					class="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-cyan-500 focus:border-transparent outline-none transition-all"
 					placeholder="name@company.com"
@@ -57,7 +45,7 @@
 				<input
 					type="password"
 					id="password"
-					bind:value={password}
+					name="password"
 					required
 					class="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-cyan-500 focus:border-transparent outline-none transition-all"
 					placeholder="••••••••"
@@ -73,9 +61,9 @@
 			</button>
 		</form>
 
-		{#if message}
-			<p class="text-center text-sm {message.includes('Check') ? 'text-green-400' : 'text-red-400'} animate-pulse">
-				{message}
+		{#if form?.message}
+			<p class="text-center text-sm {form.message.includes('Check') ? 'text-green-400' : 'text-red-400'} animate-pulse">
+				{form.message}
 			</p>
 		{/if}
 
