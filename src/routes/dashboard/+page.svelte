@@ -248,7 +248,7 @@
 					action="?/updateWebhook" 
 					use:enhance={() => {
 						updatingWebhook = true;
-						return async ({ update }) => {
+						return async ({ update, result }) => {
 							updatingWebhook = false;
 							await update();
 						};
@@ -284,9 +284,9 @@
 					</div>
 				{/if}
 
-				{#if form?.error}
+				{#if form?.message}
 					<div class="mt-4 p-4 bg-red-900/20 border border-red-900/50 rounded-xl text-red-400 text-sm">
-						{form.error}
+						{form.message}
 					</div>
 				{/if}
 
