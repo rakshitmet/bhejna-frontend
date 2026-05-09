@@ -2,7 +2,7 @@
 	import { page } from '$app/stores';
 	import Sidebar from './Sidebar.svelte';
 	import Search from './Search.svelte';
-	import { Menu, X, ChevronRight, Github, Search as SearchIcon } from 'lucide-svelte';
+	import { Menu, X, ChevronRight, Globe, Search as SearchIcon } from 'lucide-svelte';
 	import { onMount } from 'svelte';
 
 	let { children } = $props();
@@ -62,8 +62,8 @@
 				<div class="h-4 w-[1px] bg-slate-800 hidden md:block"></div>
 				
 				<a href="/dashboard" class="text-sm font-medium text-slate-400 hover:text-white transition-colors">Dashboard</a>
-				<a href="https://github.com/codenxtlab/bhejna" target="_blank" class="text-slate-400 hover:text-white transition-colors">
-					<Github size={20} />
+				<a href="https://github.com/codenxtlab/bhejna" target="_blank" class="text-slate-400 hover:text-white transition-colors" aria-label="GitHub Repository">
+					<Globe size={20} />
 				</a>
 			</div>
 		</div>
@@ -120,10 +120,10 @@
 			<footer class="mt-20 pt-8 border-t border-slate-800/60 flex flex-col sm:flex-row justify-between items-center gap-4 text-slate-500 text-sm">
 				<p>© 2026 CodeNxtLab. All rights reserved.</p>
 				<div class="flex gap-6">
-					<a href="#" class="hover:text-white transition-colors">Privacy</a>
-					<a href="#" class="hover:text-white transition-colors">Terms</a>
+					<a href="/docs/security" class="hover:text-white transition-colors">Privacy</a>
+					<a href="/docs/rate-limits" class="hover:text-white transition-colors">Terms</a>
 					<a href="https://github.com/codenxtlab/bhejna/edit/main/docs" target="_blank" class="hover:text-white transition-colors flex items-center gap-1.5">
-						<Github size={14} />
+						<Globe size={14} />
 						Edit on GitHub
 					</a>
 				</div>
@@ -136,9 +136,9 @@
 				<h4 class="text-xs font-bold text-white uppercase tracking-wider mb-4">On this page</h4>
 				<nav class="space-y-3">
 					<!-- This would be dynamically populated in a real implementation -->
-					<a href="#" class="block text-sm text-cyan-400 border-l-2 border-cyan-500 pl-4 -ml-[1.5px]">Overview</a>
-					<a href="#" class="block text-sm text-slate-500 hover:text-slate-300 transition-colors">Getting Started</a>
-					<a href="#" class="block text-sm text-slate-500 hover:text-slate-300 transition-colors">Authentication</a>
+					<a href="/docs" class="block text-sm text-cyan-400 border-l-2 border-cyan-500 pl-4 -ml-[1.5px]">Overview</a>
+					<a href="/docs/quickstart" class="block text-sm text-slate-500 hover:text-slate-300 transition-colors">Getting Started</a>
+					<a href="/docs/authentication" class="block text-sm text-slate-500 hover:text-slate-300 transition-colors">Authentication</a>
 				</nav>
 			</div>
 		</aside>
