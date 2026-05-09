@@ -8,7 +8,7 @@
 
 	let loading = $state(false);
 	let provisioning = $state(false);
-	let userEmail = $derived(data.session?.user?.email || '');
+	let userEmail = $derived(data.user?.email || '');
 	let waba_id = $state('');
 	let phone_number_id = $state('');
 	let apiKey = $state('');

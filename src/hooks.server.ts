@@ -37,17 +37,16 @@ const handleSupabase: Handle = async ({ event, resolve }) => {
 	 * This is the production-ready way to verify the user on the server.
 	 */
 	event.locals.safeGetSession = async () => {
-		const { data: { session } } = await event.locals.supabase.auth.getSession();
-		if (!session) {
-			return { session: null, user: null };
-		}
-
+		// Fetch the cryptographically secure user
 		const { data: { user }, error } = await event.locals.supabase.auth.getUser();
-		if (error) {
-			// Token is invalid/expired
+
+		if (error || !user) {
 			return { session: null, user: null };
 		}
 
+		// Instead of getting the session and triggering the warning, we return the verified user.
+		// If your SvelteKit types require a session object, mock the necessary parts or fetch it ONLY if getUser succeeds.
+		const { data: { session } } = await event.locals.supabase.auth.getSession();
 		return { session, user };
 	};
 

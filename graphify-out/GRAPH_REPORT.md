@@ -1,7 +1,7 @@
 # Graph Report - /home/rakshitbhai/bhejna-frontend  (2026-05-09)
 
 ## Corpus Check
-- 31 files · ~26,796 words
+- 31 files · ~26,824 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary

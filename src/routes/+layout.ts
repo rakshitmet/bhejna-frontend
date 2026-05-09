@@ -25,8 +25,7 @@ export const load: LayoutLoad = async ({ fetch, data, depends }) => {
      * We rely on the server-validated session and user from +layout.server.ts
      */
     return { 
-        supabase, 
-        session: data.session, 
-        user: data.user 
+        ...data,
+        supabase
     };
 };

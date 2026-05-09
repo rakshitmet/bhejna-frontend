@@ -79,7 +79,7 @@
       "label": "handleParaglide()",
       "file_type": "code",
       "source_file": "/home/rakshitbhai/bhejna-frontend/src/hooks.server.ts",
-      "source_location": "L61",
+      "source_location": "L60",
       "id": "hooks_server_handleparaglide",
       "community": 3,
       "norm_label": "handleparaglide()"
@@ -909,7 +909,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "/home/rakshitbhai/bhejna-frontend/src/hooks.server.ts",
-      "source_location": "L61",
+      "source_location": "L60",
       "weight": 1.0,
       "_src": "home_rakshitbhai_bhejna_frontend_src_hooks_server_ts",
       "_tgt": "hooks_server_handleparaglide",

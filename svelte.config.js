@@ -1,15 +1,42 @@
 import adapter from '@sveltejs/adapter-auto';
+import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
+import { mdsvex } from 'mdsvex';
+import rehypeSlug from 'rehype-slug';
+import rehypeAutolinkHeadings from 'rehype-autolink-headings';
+
+import { createHighlighter } from 'shiki';
+
+/** @type {import('mdsvex').MdsvexOptions} */
+const mdsvexOptions = {
+	extensions: ['.md', '.svx'],
+	highlight: {
+		highlighter: async (code, lang = 'text') => {
+			const highlighter = await createHighlighter({
+				themes: ['nord'],
+				langs: ['javascript', 'typescript', 'go', 'python', 'bash', 'json', 'yaml', 'curl']
+			});
+			await highlighter.loadLanguages(['javascript', 'typescript', 'go', 'python', 'bash', 'json', 'yaml', 'curl']);
+			const html = highlighter.codeToHtml(code, { lang, theme: 'nord' });
+			return `{@html \`${html}\` }`;
+		}
+	},
+	rehypePlugins: [
+		rehypeSlug,
+		[rehypeAutolinkHeadings, { behavior: 'wrap' }]
+	],
+	layout: {
+		docs: './src/lib/components/docs/DocsLayout.svelte'
+	}
+};
 
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
+	extensions: ['.svelte', '.md', '.svx'],
+	preprocess: [vitePreprocess(), mdsvex(mdsvexOptions)],
 	compilerOptions: {
-		// Force runes mode for the project, except for libraries. Can be removed in svelte 6.
 		runes: ({ filename }) => (filename.split(/[/\\]/).includes('node_modules') ? undefined : true)
 	},
 	kit: {
-		// adapter-auto only supports some environments, see https://svelte.dev/docs/kit/adapter-auto for a list.
-		// If your environment is not supported, or you settled on a specific environment, switch out the adapter.
-		// See https://svelte.dev/docs/kit/adapters for more information about adapters.
 		adapter: adapter()
 	}
 };

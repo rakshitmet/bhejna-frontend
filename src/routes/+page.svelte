@@ -4,8 +4,8 @@
 	import { supabase } from '$lib/supabase';
 
 	onMount(async () => {
-		const { data: { session } } = await supabase.auth.getSession();
-		if (session) {
+		const { data: { user } } = await supabase.auth.getUser();
+		if (user) {
 			goto('/dashboard');
 		} else {
 			goto('/login');
