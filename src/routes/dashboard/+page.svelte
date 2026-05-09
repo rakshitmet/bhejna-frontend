@@ -20,6 +20,8 @@
 	let updatingWebhook = $state(false);
 	let testResult = $state('');
 	let testError = $state('');
+	let copiedSecret = $state(false);
+	let showSecret = $state(false);
 
 	onMount(async () => {
 		const { data: { session } } = await supabase.auth.getSession();
@@ -33,9 +35,11 @@
 		}
 	});
 
-	function copySecretToClipboard(secret: string | undefined) {
+	async function copySecretToClipboard(secret: string | undefined) {
 		if (secret) {
-			navigator.clipboard.writeText(secret);
+			await navigator.clipboard.writeText(secret);
+			copiedSecret = true;
+			setTimeout(() => { copiedSecret = false; }, 2000);
 		}
 	}
 
@@ -290,30 +294,37 @@
 					<div class="mt-8 animate-in fade-in slide-in-from-bottom-4 duration-500 bg-slate-950/50 p-6 rounded-xl border border-slate-800">
 						<h4 class="text-sm font-semibold mb-3 text-slate-300 flex items-center justify-between">
 							Webhook Secret
-							<button
-								onclick={() => copySecretToClipboard(form?.webhook_secret || data?.tenant?.webhook_secret)}
-								class="p-1.5 bg-slate-800 hover:bg-slate-700 rounded-lg text-slate-400 hover:text-white transition-colors flex items-center text-xs"
-								title="Copy secret"
-							>
-								<svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
-								Copy
-							</button>
+							<div class="flex items-center space-x-2">
+								<button
+									onclick={() => showSecret = !showSecret}
+									class="text-xs text-slate-400 hover:text-white transition-colors"
+								>
+									{showSecret ? 'Hide' : 'Show'}
+								</button>
+								<button
+									onclick={() => copySecretToClipboard(form?.webhook_secret || data?.tenant?.webhook_secret)}
+									class="text-xs text-cyan-500 hover:text-cyan-400 font-bold transition-colors"
+								>
+									{copiedSecret ? 'Copied!' : 'Copy'}
+								</button>
+							</div>
 						</h4>
+
 						<div class="relative group mb-4">
-							<pre class="bg-black/80 border border-cyan-900/50 rounded-lg p-4 font-mono text-cyan-400 overflow-x-auto shadow-inner text-sm"><code>{form?.webhook_secret || data?.tenant?.webhook_secret}</code></pre>
+							<input 
+								type={showSecret ? "text" : "password"} 
+								readonly 
+								value={form?.webhook_secret || data?.tenant?.webhook_secret || ''}
+								placeholder="No secret generated yet"
+								class="w-full bg-black/80 border border-cyan-900/50 rounded-lg p-4 font-mono text-cyan-400 text-sm focus:ring-1 focus:ring-cyan-500 outline-none transition-all shadow-inner"
+							/>
 						</div>
 						
 						<div class="mt-4 pt-4 border-t border-slate-800">
-							<p class="text-xs text-slate-400 mb-2">
-								<strong>Verification Note:</strong> Bhejna signs all webhook requests. Compute an HMAC SHA-256 hash of the raw request body using your secret, and compare it to the <code class="text-cyan-300 bg-slate-900 px-1 rounded">X-Bhejna-Signature</code> header.
-							</p>
-							<pre class="bg-slate-900/80 rounded-lg p-3 text-xs text-slate-500 overflow-x-auto border border-slate-800"><code>const hash = crypto.createHmac('sha256', secret)
+							<p class="text-[10px] uppercase tracking-widest text-slate-500 font-bold mb-2">Verification Sample (Node.js)</p>
+							<pre class="bg-slate-900/80 rounded-lg p-3 text-xs text-slate-500 overflow-x-auto border border-slate-800"><code>const hash = crypto.createHmac('sha256', '{form?.webhook_secret || data?.tenant?.webhook_secret || "YOUR_SECRET"}')
   .update(rawBody)
-  .digest('hex');
-
-if (hash === headers['x-bhejna-signature']) {'{'}
-  // Request is verified
-{'}'}</code></pre>
+  .digest('hex');</code></pre>
 						</div>
 					</div>
 				{/if}
