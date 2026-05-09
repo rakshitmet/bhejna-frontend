@@ -80,22 +80,17 @@ export const actions = {
         }
 
         // 3. Database Update (Source of Truth)
-        const { error: updateError } = await supabase
+        const { data: updatedTenant, error: updateError } = await supabase
             .from('tenants')
             .update({ webhook_url, webhook_secret })
-            .eq('user_id', user.id);
+            .eq('user_id', user.id)
+            .select()
+            .single();
 
         if (updateError) {
-            console.error('Failed to update webhook settings:', updateError);
-            return fail(500, { error: 'Database update failed' });
+            console.error("Supabase Update Failed:", updateError);
+            return fail(500, { error: "Database update failed: " + updateError.message });
         }
-
-        // Fetch updated row to ensure we have the latest state for hydration
-        const { data: updatedTenant } = await supabase
-            .from('tenants')
-            .select('*')
-            .eq('user_id', user.id)
-            .single();
 
         if (!updatedTenant) {
             return fail(500, { error: 'Failed to verify updated tenant record' });
