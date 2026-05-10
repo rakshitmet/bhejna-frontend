@@ -5,7 +5,9 @@
 	"type": "module",
 	"scripts": {
 		"dev": "vite dev",
+		"predev": "tsx src/lib/utils/openapi-compiler.ts",
 		"build": "vite build",
+		"prebuild": "tsx src/lib/utils/openapi-compiler.ts",
 		"preview": "vite preview",
 		"prepare": "svelte-kit sync || echo ''",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",

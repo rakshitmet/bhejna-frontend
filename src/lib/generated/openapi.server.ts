@@ -990,7 +990,7 @@ export const spec = {
 } as const;
 
 /**
- * API Operations indexed by operationId
+ * API Operations indexed by operationId (includes webhooks for uniform ApiEndpoint access)
  */
 export const operations = {
   "forceGenerateWebhookType": {
@@ -1626,7 +1626,7 @@ export const operations = {
 } as const;
 
 /**
- * API Webhooks indexed by key
+ * API Webhooks indexed by webhook key (e.g. "delivery_update")
  */
 export const webhooks = {
   "delivery_update": {

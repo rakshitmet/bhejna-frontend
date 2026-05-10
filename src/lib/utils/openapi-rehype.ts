@@ -1,63 +1,42 @@
 import visit from 'unist-util-visit';
-import { operations, webhooks, schemas } from '../generated/openapi.server.ts';
+import { schemas } from '../generated/openapi.server.ts';
 import { highlight } from './docs.server.ts';
 
 /**
- * Rehype plugin that injects OpenAPI operation data into ApiEndpoint components
- * at build-time. This ensures the client bundle doesn't need to import the
- * entire OpenAPI registry.
+ * Rehype plugin for OpenAPI documentation.
+ *
+ * IMPORTANT ARCHITECTURAL NOTE:
+ * In mdsvex, Svelte component tags like <ApiEndpoint operationId="sendMessage" />
+ * pass through the rehype AST as raw text/HTML nodes — they are NOT represented as
+ * element nodes with tagName === 'ApiEndpoint'. This means rehype plugins cannot
+ * intercept them to inject props.
+ *
+ * Therefore, ApiEndpoint.svelte resolves its own data directly from the compiled
+ * registry (src/lib/generated/openapi.ts) using its operationId prop.
+ *
+ * This plugin handles:
+ *   1. Pre-highlighting fenced code blocks via Shiki (for <pre> elements)
+ *   2. Schema injection for SchemaTable (when schemaName prop is provided)
+ *
+ * The plugin does NOT need to inject opData into ApiEndpoint — that's handled
+ * by the component itself via direct registry import.
  */
 export function rehypeOpenApi() {
 	return async (tree: any) => {
 		const promises: Promise<void>[] = [];
 
 		visit(tree, 'element', (node: any) => {
-			if (node.tagName === 'ApiEndpoint') {
-				const operationId = node.properties?.operationId;
-				
-				if (operationId) {
-					const opData = { ...((operations as any)[operationId] || (webhooks as any)[operationId]) };
-					
-					if (opData && Object.keys(opData).length > 0) {
-						// Pre-highlight code samples
-						const processSamples = async () => {
-							if (opData['x-codeSamples']) {
-								for (const sample of opData['x-codeSamples']) {
-									sample.highlightedSource = await highlight(sample.source, sample.lang);
-								}
-							}
-							
-							// Also highlight default examples if they exist
-							const requestExample = opData.requestBody?.content?.['application/json']?.example;
-							if (requestExample) {
-								opData.highlightedRequestExample = await highlight(JSON.stringify(requestExample, null, 2), 'json');
-							}
-							
-							const successResponse = opData.responses?.['200'] || opData.responses?.['201'] || opData.responses?.['202'];
-							const responseExample = successResponse?.content?.['application/json']?.example;
-							if (responseExample) {
-								opData.highlightedResponseExample = await highlight(JSON.stringify(responseExample, null, 2), 'json');
-							}
+			// Note: <ApiEndpoint> nodes are NOT visible here due to how mdsvex processes
+			// Svelte components. ApiEndpoint resolves its own data from the registry.
 
-							node.properties.opData = JSON.stringify(opData);
-						};
-						
-						promises.push(processSamples());
-					} else {
-						console.warn(`⚠️  rehypeOpenApi: OperationId "${operationId}" not found in registry.`);
-					}
-				}
-			}
-
+			// Handle SchemaTable schema injection (if schemaName prop is used)
 			if (node.tagName === 'SchemaTable') {
 				const schemaName = node.properties?.schemaName;
-				// If MDX uses <SchemaTable schema={schemas.ErrorResponse} />, 
-				// it might come in as a string in node.properties.schema
 				const schemaProp = node.properties?.schema;
 
 				let targetSchema = schemaName;
 				if (!targetSchema && typeof schemaProp === 'string') {
-					// Extract "ErrorResponse" from "{schemas.ErrorResponse}"
+					// Extract "ErrorResponse" from "{schemas.ErrorResponse}" style references
 					const match = schemaProp.match(/schemas\.(\w+)/);
 					if (match) targetSchema = match[1];
 				}
@@ -67,7 +46,11 @@ export function rehypeOpenApi() {
 					if (schemaData) {
 						node.properties.schemaData = JSON.stringify(schemaData);
 					} else {
-						console.warn(`⚠️  rehypeOpenApi: Schema "${targetSchema}" not found in registry.`);
+						const available = Object.keys(schemas as any);
+						console.warn(
+							`⚠️  rehypeOpenApi: Schema "${targetSchema}" not found in registry.\n` +
+							`   Available schemas: ${available.join(', ')}`
+						);
 					}
 				}
 			}
