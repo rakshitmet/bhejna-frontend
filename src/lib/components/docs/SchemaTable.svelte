@@ -16,17 +16,27 @@
 	}
 
 	let { 
-		schema, 
+		schema: schemaProp,
+		schemaData, 
 		title = 'Schema Properties',
 		level = 0 
 	}: { 
-		schema: SchemaProperty; 
+		schema?: SchemaProperty;
+		schemaData?: any;
 		title?: string;
 		level?: number;
 	} = $props();
 
+	// Resolve schema from either prop
+	const schema = $derived.by(() => {
+		if (schemaData) {
+			return typeof schemaData === 'string' ? JSON.parse(schemaData) : schemaData;
+		}
+		return schemaProp;
+	});
+
 	const getRequired = (propName: string) => {
-		return schema.required?.includes(propName) || false;
+		return schema?.required?.includes(propName) || false;
 	};
 
 	const getTypeLabel = (prop: any) => {
@@ -40,7 +50,7 @@
 </script>
 
 <div class="mt-4 {level === 0 ? 'mb-8' : ''}">
-	{#if level === 0}
+	{#if level === 0 && schema}
 		<h5 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-4 flex items-center gap-2">
 			<Braces size={14} />
 			{title}
@@ -48,7 +58,7 @@
 	{/if}
 
 	<div class="space-y-3">
-		{#if schema.properties}
+		{#if schema?.properties}
 			{#each Object.entries(schema.properties) as [name, prop]}
 				<div class="group relative flex flex-col p-4 rounded-xl border border-slate-800/60 bg-slate-900/10 hover:bg-slate-900/30 transition-colors">
 					<div class="flex items-center justify-between mb-2">
@@ -97,7 +107,7 @@
 					{/if}
 				</div>
 			{/each}
-		{:else if schema.oneOf || schema.allOf}
+		{:else if schema?.oneOf || schema?.allOf}
 			<div class="p-4 rounded-xl border border-dashed border-slate-800 bg-slate-900/5">
 				<p class="text-xs text-slate-500 italic">This property uses a complex type ({schema.oneOf ? 'oneOf' : 'allOf'}). See schema details for more information.</p>
 			</div>

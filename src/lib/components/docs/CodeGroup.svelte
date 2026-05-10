@@ -1,17 +1,17 @@
 <script lang="ts">
 	import { Terminal, Globe, Cpu, Copy, Check } from 'lucide-svelte';
-	import { highlight } from '$lib/utils/docs';
+	// import { highlight } from '$lib/utils/docs'; // REMOVED to reduce bundle size
 
 	interface CodeExample {
 		lang: string;
 		label: string;
 		code: string;
+		highlightedCode?: string;
 	}
 
 	let { examples = [] }: { examples: CodeExample[] } = $props();
 	let activeIndex = $state(0);
 	let copied = $state(false);
-	let highlightedCodes = $state<string[]>([]);
 
 	const activeExample = $derived(examples[activeIndex]);
 
@@ -23,13 +23,6 @@
 		python: Cpu,
 		go: Cpu
 	};
-
-	// Highlight all examples on mount or when examples change
-	$effect(() => {
-		Promise.all(examples.map(ex => highlight(ex.code, ex.lang))).then(results => {
-			highlightedCodes = results;
-		});
-	});
 
 	async function copyToClipboard() {
 		if (!activeExample) return;
@@ -75,9 +68,9 @@
 
 	<!-- Code Area -->
 	<div class="relative overflow-x-auto font-mono text-sm leading-relaxed scrollbar-thin scrollbar-thumb-slate-800 scrollbar-track-transparent">
-		{#if highlightedCodes[activeIndex]}
+		{#if activeExample?.highlightedCode}
 			<div class="highlighted-code">
-				{@html highlightedCodes[activeIndex]}
+				{@html activeExample.highlightedCode}
 			</div>
 		{:else}
 			<pre class="m-0 p-6"><code class="text-slate-300">{activeExample?.code}</code></pre>

@@ -36,5 +36,5 @@ Explore our documentation to integrate Bhejna into your production environment.
 
 - [Quickstart Guide](/docs/quickstart) — Get up and running in 5 minutes.
 - [Authentication](/docs/authentication) — Learn how to secure your API requests.
-- [API Reference](/docs/api-reference) — Explore detailed endpoint documentation.
+- [API Reference](/docs/api-reference/send-message) — Explore detailed endpoint documentation.
 - [Webhooks](/docs/webhooks) — Listen for real-time delivery events.

@@ -1,15 +1,24 @@
 <script lang="ts">
 	import { Terminal, Shield, ArrowRight, CornerDownRight, Zap, Code2, Webhook, Box } from 'lucide-svelte';
-	import { operations, webhooks, type OperationId, type WebhookKey } from '$lib/generated/openapi';
+	// import { operations, webhooks, type OperationId, type WebhookKey } from '$lib/generated/openapi'; // REMOVED
 	import CodeGroup from './CodeGroup.svelte';
 	import SchemaTable from './SchemaTable.svelte';
 
-	let { operationId, minimal = false }: { operationId: OperationId | WebhookKey, minimal?: boolean } = $props();
+	let { opData, minimal = false }: { opData: any, minimal?: boolean } = $props();
 
-	// Lookup from the build-time generated registry
-	// Check operations first, then webhooks
-	const op = $derived((operations as any)[operationId] || (webhooks as any)[operationId]);
-	const isWebhook = $derived(!!(webhooks as any)[operationId]);
+	// Parse opData if it's passed as a JSON string (from rehype)
+	const op = $derived.by(() => {
+		if (typeof opData === 'string') {
+			try {
+				return JSON.parse(opData);
+			} catch (e) {
+				return null;
+			}
+		}
+		return opData;
+	});
+
+	const isWebhook = $derived(!!op?.isWebhook);
 
 	const methodColors: Record<string, string> = {
 		GET: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
@@ -25,7 +34,8 @@
 		const samples = op?.['x-codeSamples']?.map((sample: any) => ({
 			lang: sample.lang,
 			label: sample.label,
-			code: sample.source
+			code: sample.source,
+			highlightedCode: sample.highlightedSource
 		})) || [];
 
 		// Generate default curl if no samples exist and it's not a webhook
@@ -135,7 +145,12 @@
 							<div class="mt-6">
 								<h6 class="text-[10px] font-bold text-slate-600 uppercase tracking-widest mb-3">Payload Example</h6>
 								<div class="rounded-xl overflow-hidden border border-slate-800">
-									<CodeGroup examples={[{ lang: 'json', label: 'Example', code: JSON.stringify(requestExample, null, 2) }]} />
+									<CodeGroup examples={[{ 
+										lang: 'json', 
+										label: 'Example', 
+										code: JSON.stringify(requestExample, null, 2),
+										highlightedCode: op.highlightedRequestExample
+									}]} />
 								</div>
 							</div>
 						{/if}
@@ -174,7 +189,12 @@
 							<div class="mt-6">
 								<h6 class="text-[10px] font-bold text-slate-600 uppercase tracking-widest mb-3">Response Example</h6>
 								<div class="rounded-xl overflow-hidden border border-slate-800">
-									<CodeGroup examples={[{ lang: 'json', label: 'Example', code: JSON.stringify(responseExample, null, 2) }]} />
+									<CodeGroup examples={[{ 
+										lang: 'json', 
+										label: 'Example', 
+										code: JSON.stringify(responseExample, null, 2),
+										highlightedCode: op.highlightedResponseExample
+									}]} />
 								</div>
 							</div>
 						{/if}
@@ -185,7 +205,7 @@
 	{/if}
 {:else}
 	<div class="p-4 rounded-xl border border-red-500/20 bg-red-500/5 text-red-400 text-xs">
-		Error: Operation or Webhook <code>{operationId}</code> not found in canonical API registry.
+		Error: Operation or Webhook data not found in canonical API registry.
 	</div>
 {/if}
 

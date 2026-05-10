@@ -10,5 +10,18 @@ export default defineConfig({
 		tailwindcss(),
 		sveltekit(),
 		paraglideVitePlugin({ project: './project.inlang', outdir: './src/lib/paraglide' })
-	]
+	],
+	build: {
+		target: 'esnext',
+		rollupOptions: {
+			output: {
+				manualChunks: (id) => {
+					if (id.includes('node_modules')) {
+						if (id.includes('lucide')) return 'vendor-icons';
+						return 'vendor';
+					}
+				}
+			}
+		}
+	}
 });

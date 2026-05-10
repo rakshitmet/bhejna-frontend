@@ -49,5 +49,5 @@ You can track the status of this message in the **Delivery Logs** section of you
 ## 5. Next Steps
 
 - [Learn about Authentication](/docs/authentication)
-- [Explore the Full API Reference](/docs/api-reference)
+- [Explore the Full API Reference](/docs/api-reference/send-message)
 - [Configure Webhooks](/docs/webhooks)

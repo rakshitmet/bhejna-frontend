@@ -1,10 +1,11 @@
-import adapter from '@sveltejs/adapter-auto';
+import adapter from '@sveltejs/adapter-node';
 import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
 import { mdsvex } from 'mdsvex';
 import rehypeSlug from 'rehype-slug';
 import rehypeAutolinkHeadings from 'rehype-autolink-headings';
 import path from 'path';
-import { highlight } from './src/lib/utils/docs.ts';
+import { highlight } from './src/lib/utils/docs.server.ts';
+import { rehypeOpenApi } from './src/lib/utils/openapi-rehype.ts';
 import visit from 'unist-util-visit';
 
 function rehypeComponentMapping() {
@@ -40,7 +41,8 @@ const mdsvexOptions = {
 	rehypePlugins: [
 		rehypeSlug,
 		[rehypeAutolinkHeadings, { behavior: 'wrap' }],
-		rehypeComponentMapping
+		rehypeComponentMapping,
+		rehypeOpenApi
 	],
 	layout: {
 		docs: path.resolve('./src/lib/components/docs/DocsLayout.svelte')

@@ -4,8 +4,6 @@ layout: docs
 
 
 <script>
-  import { schemas } from '$lib/generated/openapi';
-
   import { ApiEndpoint, Callout, CodeGroup, SchemaTable } from '$docs';
   import { DocsH1, DocsH2, DocsH3, DocsPre, DocsTable, DocsBlockquote, DocsUl, DocsOl } from '$docs/MDX';
 </script>
@@ -18,7 +16,7 @@ Bhejna uses standard HTTP status codes and a consistent JSON error schema to hel
 
 All error responses follow this structure:
 
-<SchemaTable schema={schemas.ErrorResponse} title="Error Response Schema" />
+<SchemaTable schemaName="ErrorResponse" title="Error Response Schema" />
 
 ## Common Error Codes
 

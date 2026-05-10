@@ -8,7 +8,7 @@ import path from 'path';
  */
 export async function compileOpenAPI() {
 	const specPath = path.resolve('static/openapi/openapi.yaml');
-	const outPath = path.resolve('src/lib/generated/openapi.ts');
+	const outPath = path.resolve('src/lib/generated/openapi.server.ts');
 
 	// Ensure the spec exists
 	if (!fs.existsSync(specPath)) {
@@ -84,7 +84,20 @@ export async function compileOpenAPI() {
 		}
 
 		// 4. Generate the TypeScript registry
-		const tsContent = `// THIS FILE IS GENERATED. DO NOT EDIT MANUALLY.
+		const typesOnlyContent = `// THIS FILE IS GENERATED. DO NOT EDIT MANUALLY.
+/* eslint-disable */
+// @ts-nocheck
+
+export const schemas = {} as any;
+export const operations = {} as any;
+export const webhooks = {} as any;
+
+export type OperationId = string;
+export type WebhookKey = string;
+export type SchemaName = string;
+`;
+
+		const serverContent = `// THIS FILE IS GENERATED. DO NOT EDIT MANUALLY.
 /* eslint-disable */
 // @ts-nocheck
 
@@ -118,10 +131,12 @@ export type SchemaName = keyof typeof schemas;
 		if (!fs.existsSync(outDir)) {
 			fs.mkdirSync(outDir, { recursive: true });
 		}
-		fs.writeFileSync(outPath, tsContent);
+		
+		fs.writeFileSync(outPath, serverContent);
+		fs.writeFileSync(path.resolve('src/lib/generated/openapi.ts'), typesOnlyContent);
 		
 		const timestamp = new Date().toLocaleTimeString();
-		console.log(`[${timestamp}] ✅ OpenAPI registry updated: src/lib/generated/openapi.ts`);
+		console.log(`[${timestamp}] ✅ OpenAPI registry updated: src/lib/generated/openapi.server.ts and openapi.ts`);
 	} catch (err) {
 		console.error('❌ OpenAPI compilation failed:');
 		console.error(err instanceof Error ? err.message : err);
