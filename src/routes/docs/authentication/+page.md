@@ -1,11 +1,11 @@
 ---
 layout: docs
 ---
-
 <script>
-	import Callout from '$lib/components/docs/Callout.svelte';
-	import CodeBlock from '$lib/components/docs/CodeBlock.svelte';
+  import { ApiEndpoint, Callout, CodeGroup, SchemaTable } from '$docs';
+  import { DocsH1, DocsH2, DocsH3, DocsPre, DocsTable, DocsBlockquote, DocsUl, DocsOl } from '$docs/MDX';
 </script>
+
 
 # Authentication
 
@@ -15,15 +15,7 @@ Bhejna uses API keys to authenticate requests. You can view and manage your API 
 
 All API requests must include your API key in the `X-API-Key` HTTP header. 
 
-<CodeBlock 
-  examples={[
-    {
-      lang: 'bash',
-      label: 'HTTP Header',
-      code: `X-API-Key: nxt_live_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx`
-    }
-  ]}
-/>
+<CodeGroup examples={[{ lang: 'bash', label: 'HTTP Header', code: 'X-API-Key: nxt_live_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx' }]} />
 
 ### Key Prefixes
 
@@ -38,15 +30,7 @@ We use prefixes to help you identify the environment of your key:
 
 For internal operations or when communicating between Bhejna microservices, we use Bearer JWT authentication. This is generally reserved for system-level integrations.
 
-<CodeBlock 
-  examples={[
-    {
-      lang: 'bash',
-      label: 'Internal Auth',
-      code: `Authorization: Bearer <JWT_TOKEN>`
-    }
-  ]}
-/>
+<CodeGroup examples={[{ lang: 'bash', label: 'Internal Auth', code: 'Authorization: Bearer <JWT_TOKEN>' }]} />
 
 ## Security Best Practices
 

@@ -1,0 +1,85 @@
+<script>
+	import Layout_MDSVEX_DEFAULT from '/home/rakshitbhai/bhejna-frontend/src/lib/components/docs/DocsLayout.svelte';
+    import DocsH1 from '$docs/MDX/H1.svelte';
+    import DocsH2 from '$docs/MDX/H2.svelte';
+    import DocsH3 from '$docs/MDX/H3.svelte';
+    import DocsUl from '$docs/MDX/Ul.svelte';
+    import DocsOl from '$docs/MDX/Ol.svelte';
+    import DocsPre from '$docs/MDX/Pre.svelte';
+    import DocsTable from '$docs/MDX/Table.svelte';
+    import DocsBlockquote from '$docs/MDX/Blockquote.svelte';
+    import CodeGroup from '$docs/CodeGroup.svelte';
+    import Callout from '$docs/Callout.svelte';
+    import ApiEndpoint from '$docs/ApiEndpoint.svelte';
+</script>
+<Layout_MDSVEX_DEFAULT {...$$props}>
+
+<hr>
+<DocsH2 id="layout-docs"><a href="#layout-docs">layout: docs</a></DocsH2>
+<DocsH1 id="webhooks"><a href="#webhooks">Webhooks</a></DocsH1>
+<p>Webhooks allow you to receive real-time notifications when something happens in your Bhejna account. Instead of polling the API, Bhejna will push data to your server as events occur.</p>
+<DocsH2 id="event-types"><a href="#event-types">Event Types</a></DocsH2>
+<DocsTable>
+<thead>
+<tr>
+<th align="left">Event</th>
+<th align="left">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left"><code>message.sent</code></td>
+<td align="left">The message has been successfully handed over to Meta.</td>
+</tr>
+<tr>
+<td align="left"><code>message.delivered</code></td>
+<td align="left">The recipient’s device has confirmed delivery.</td>
+</tr>
+<tr>
+<td align="left"><code>message.read</code></td>
+<td align="left">The recipient has opened the message.</td>
+</tr>
+<tr>
+<td align="left"><code>message.failed</code></td>
+<td align="left">Delivery failed (e.g., invalid number, blocked).</td>
+</tr>
+</tbody>
+</DocsTable>
+<DocsH2 id="security"><a href="#security">Security</a></DocsH2>
+<p>Every webhook request from Bhejna includes an <code>X-Bhejna-Signature</code> header. You <strong>must</strong> verify this signature to ensure the request originated from Bhejna.</p>
+<DocsH3 id="verifying-signatures"><a href="#verifying-signatures">Verifying Signatures</a></DocsH3>
+<p>The signature is a Hex-encoded HMAC SHA-256 hash of the raw request body, using your <strong>Webhook Secret</strong> as the key.</p>
+<CodeGroup 
+  examples={[
+    {
+      lang: 'javascript',
+      label: 'Node.js',
+      code: `const crypto = require('crypto');
+<p>function verifyWebhook(payload, signature, secret) {
+const hmac = crypto.createHmac(‘sha256’, secret);
+const digest = hmac.update(payload).digest(‘hex’);
+return digest === signature;
+}<code>    &#125;,     &#123;       lang: 'go',       label: 'Go',       code:</code>func VerifySignature(body []byte, signature string, secret string) bool {
+h := hmac.New(sha256.New, []byte(secret))
+h.Write(body)
+expected := hex.EncodeToString(h.Sum(nil))
+return expected == signature
+}`
+}
+]}
+/></p>
+<DocsH2 id="payload-example"><a href="#payload-example">Payload Example</a></DocsH2>
+{@html `<pre class="shiki nord" style="background-color:#2e3440ff;color:#d8dee9ff" tabindex="0"><code><span class="line"><span style="color:#ECEFF4">{</span></span>
+<span class="line"><span style="color:#ECEFF4">  "</span><span style="color:#8FBCBB">event</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">:</span><span style="color:#ECEFF4"> "</span><span style="color:#A3BE8C">message.delivered</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">,</span></span>
+<span class="line"><span style="color:#ECEFF4">  "</span><span style="color:#8FBCBB">job_id</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">:</span><span style="color:#ECEFF4"> "</span><span style="color:#A3BE8C">01ARZ3NDEKTSV4RRFFQ69G5FAV</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">,</span></span>
+<span class="line"><span style="color:#ECEFF4">  "</span><span style="color:#8FBCBB">recipient</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">:</span><span style="color:#ECEFF4"> "</span><span style="color:#A3BE8C">+15551234567</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">,</span></span>
+<span class="line"><span style="color:#ECEFF4">  "</span><span style="color:#8FBCBB">timestamp</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">:</span><span style="color:#ECEFF4"> "</span><span style="color:#A3BE8C">2026-05-09T16:50:00Z</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">,</span></span>
+<span class="line"><span style="color:#ECEFF4">  "</span><span style="color:#8FBCBB">data</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">:</span><span style="color:#ECEFF4"> {</span></span>
+<span class="line"><span style="color:#ECEFF4">    "</span><span style="color:#8FBCBB">messaging_product</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">:</span><span style="color:#ECEFF4"> "</span><span style="color:#A3BE8C">whatsapp</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">,</span></span>
+<span class="line"><span style="color:#ECEFF4">    "</span><span style="color:#8FBCBB">display_phone_number</span><span style="color:#ECEFF4">"</span><span style="color:#ECEFF4">:</span><span style="color:#ECEFF4"> "</span><span style="color:#A3BE8C">15550001111</span><span style="color:#ECEFF4">"</span></span>
+<span class="line"><span style="color:#ECEFF4">  }</span></span>
+<span class="line"><span style="color:#ECEFF4">}</span></span></code></pre>` }
+<Callout type="info" title="Reliable Delivery">
+  If your server returns anything other than a `2xx` status code, Bhejna will retry the webhook delivery with exponential backoff for up to 24 hours.
+</Callout>
+</Layout_MDSVEX_DEFAULT>

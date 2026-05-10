@@ -1,6 +1,11 @@
 ---
 layout: docs
 ---
+<script>
+  import { ApiEndpoint, Callout, CodeGroup, SchemaTable } from '$docs';
+  import { DocsH1, DocsH2, DocsH3, DocsPre, DocsTable, DocsBlockquote, DocsUl, DocsOl } from '$docs/MDX';
+</script>
+
 
 # Delivery Lifecycle
 

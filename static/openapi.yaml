@@ -114,7 +114,37 @@ paths:
   /v1/messages:
     post:
       summary: Send a WhatsApp message
+      operationId: sendMessage
       description: Enqueues a message for delivery via WhatsApp.
+      x-codeSamples:
+        - lang: curl
+          label: cURL
+          source: |
+            curl -X POST https://api.bhejna.com/v1/messages \
+              -H "X-API-Key: nxt_live_your_key" \
+              -H "Content-Type: application/json" \
+              -d '{
+                "recipient": "+1234567890",
+                "message_type": "text",
+                "payload": {
+                  "body": "Hello from Bhejna!"
+                }
+              }'
+        - lang: javascript
+          label: Node.js
+          source: |
+            const response = await fetch('https://api.bhejna.com/v1/messages', {
+              method: 'POST',
+              headers: {
+                'X-API-Key': 'nxt_live_your_key',
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                recipient: '+1234567890',
+                message_type: 'text',
+                payload: { body: 'Hello from Bhejna!' }
+              })
+            });
       security:
         - ApiKeyAuth: []
       parameters:
@@ -156,6 +186,7 @@ paths:
   /v1/internal/tenant:
     post:
       summary: Sync or provision a tenant
+      operationId: syncTenant
       description: Internal endpoint to provision or update tenant configuration.
       security:
         - InternalAuth: []
@@ -177,6 +208,7 @@ paths:
   /v1/internal/tenants/{id}/pause:
     put:
       summary: Pause a tenant
+      operationId: pauseTenant
       description: Manually pause message delivery for a tenant.
       security:
         - InternalAuth: []
@@ -194,7 +226,24 @@ webhooks:
   delivery_update:
     post:
       summary: Delivery status update
-      description: Sent when a message status changes (sent, delivered, read, failed).
+      description: |
+        Sent when a message status changes (sent, delivered, read, failed).
+        All requests are signed with your Webhook Secret in the `X-Bhejna-Signature` header.
+      x-codeSamples:
+        - lang: javascript
+          label: Node.js (Verify)
+          source: |
+            const crypto = require('crypto');
+            const hmac = crypto.createHmac('sha256', process.env.WEBHOOK_SECRET);
+            const digest = hmac.update(rawBody).digest('hex');
+            const isValid = digest === headers['x-bhejna-signature'];
+        - lang: go
+          label: Go (Verify)
+          source: |
+            h := hmac.New(sha256.New, []byte(secret))
+            h.Write(body)
+            expected := hex.EncodeToString(h.Sum(nil))
+            isValid := expected == signature
       requestBody:
         content:
           application/json:

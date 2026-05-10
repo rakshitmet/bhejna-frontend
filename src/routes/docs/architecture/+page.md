@@ -1,10 +1,12 @@
 ---
 layout: docs
 ---
-
 <script>
-	import Callout from '$lib/components/docs/Callout.svelte';
+  import { ApiEndpoint, Callout, CodeGroup, SchemaTable } from '$docs';
+  import { DocsH1, DocsH2, DocsH3, DocsPre, DocsTable, DocsBlockquote, DocsUl, DocsOl } from '$docs/MDX';
 </script>
+
+
 
 # System Architecture
 
@@ -35,9 +37,7 @@ A globally distributed cache (powered by Go internal maps and Redis) that stores
 
 ## Security Architecture
 
-<Callout type="info" title="Zero-Trust Internal Network">
-  All communication between Bhejna microservices is encrypted via mTLS and requires internal JWT authentication.
-</Callout>
+<Callout type="info" title="Zero-Trust Internal Network">All communication between Bhejna microservices is encrypted via mTLS and requires internal JWT authentication.</Callout>
 
 - **Data Encryption**: All message payloads are encrypted at rest.
 - **Isolation**: Each tenant operates within a virtualized quota space, ensuring one customer's traffic spikes don't affect another.

@@ -1,12 +1,8 @@
----
-layout: docs
----
 
 <script>
-	import Callout from '$lib/components/docs/Callout.svelte';
-	import CodeBlock from '$lib/components/docs/CodeBlock.svelte';
+  import { ApiEndpoint, Callout, CodeGroup, SchemaTable } from '$docs';
+  import { DocsH1, DocsH2, DocsH3, DocsPre, DocsTable, DocsBlockquote, DocsUl, DocsOl } from '$docs/MDX';
 </script>
-
 # Quickstart Guide
 
 This guide will help you send your first message using Bhejna in less than 5 minutes.
@@ -31,25 +27,7 @@ Bhejna will automatically generate a production-grade API key for you.
 
 You can use the following `curl` command to test your integration. Replace `YOUR_API_KEY` with the key from your dashboard and `RECIPIENT_PHONE` with your test number.
 
-<CodeBlock 
-  examples={[
-    {
-      lang: 'curl',
-      label: 'cURL',
-      code: `curl -X POST https://api.bhejna.com/v1/messages \\
-  -H "X-API-Key: YOUR_API_KEY" \\
-  -H "Content-Type: application/json" \\
-  -d '{
-    "recipient": "RECIPIENT_PHONE",
-    "message_type": "template",
-    "payload": {
-      "name": "hello_world",
-      "language": { "code": "en_US" }
-    }
-  }'`
-    }
-  ]}
-/>
+<ApiEndpoint operationId="sendMessage" minimal={true} />
 
 ## 4. Verify Delivery
 

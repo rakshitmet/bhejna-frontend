@@ -1,11 +1,11 @@
 ---
 layout: docs
 ---
-
 <script>
-	import ApiEndpoint from '$lib/components/docs/ApiEndpoint.svelte';
-	import Callout from '$lib/components/docs/Callout.svelte';
+  import { ApiEndpoint, Callout, CodeGroup, SchemaTable } from '$docs';
+  import { DocsH1, DocsH2, DocsH3, DocsPre, DocsTable, DocsBlockquote, DocsUl, DocsOl } from '$docs/MDX';
 </script>
+
 
 # Management API
 
@@ -19,51 +19,13 @@ The Management API allows you to programmatically manage your Bhejna tenants, mo
 
 Use this endpoint to synchronize tenant configuration between the dashboard and the Go delivery engine.
 
-<ApiEndpoint 
-  method="POST" 
-  path="/v1/internal/tenant" 
-  summary="Provision or Update Tenant"
-  description="Creates a new tenant record or updates an existing one in the Go engine's local cache."
-  parameters={[
-    {
-      name: 'id',
-      type: 'string',
-      required: true,
-      description: 'The internal UUID of the tenant.'
-    },
-    {
-      name: 'waba_id',
-      type: 'string',
-      required: true,
-      description: 'The Meta WhatsApp Business Account ID.'
-    },
-    {
-      name: 'api_key',
-      type: 'string',
-      required: true,
-      description: 'The API key used for message authentication.'
-    }
-  ]}
-/>
+<ApiEndpoint operationId="syncTenant" />
 
 ## Pause Delivery
 
 Manually pause message delivery for a specific tenant. This is useful for maintenance or when a tenant exceeds their quota.
 
-<ApiEndpoint 
-  method="PUT" 
-  path="/v1/internal/tenants/{id}/pause" 
-  summary="Pause Tenant"
-  description="Prevents any new messages from being sent for this tenant until unpaused."
-  parameters={[
-    {
-      name: 'id',
-      type: 'string',
-      required: true,
-      description: 'The internal UUID of the tenant to pause.'
-    }
-  ]}
-/>
+<ApiEndpoint operationId="pauseTenant" />
 
 ## Status Codes
 

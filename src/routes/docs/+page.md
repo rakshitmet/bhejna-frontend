@@ -1,11 +1,11 @@
 ---
 layout: docs
 ---
-
 <script>
-	import Callout from '$lib/components/docs/Callout.svelte';
-	import CodeBlock from '$lib/components/docs/CodeBlock.svelte';
+  import { ApiEndpoint, Callout, CodeGroup, SchemaTable } from '$docs';
+  import { DocsH1, DocsH2, DocsH3, DocsPre, DocsTable, DocsBlockquote, DocsUl, DocsOl } from '$docs/MDX';
 </script>
+
 
 # Bhejna Documentation
 
@@ -28,42 +28,7 @@ We provide a contract-first API designed to eliminate the complexity of the What
 
 To get started, you can send your first message using a simple `curl` command.
 
-<CodeBlock 
-  examples={[
-    {
-      lang: 'curl',
-      label: 'cURL',
-      code: `curl -X POST https://api.bhejna.com/v1/messages \\
-  -H "X-API-Key: nxt_live_your_key" \\
-  -H "Content-Type: application/json" \\
-  -d '{
-    "recipient": "+1234567890",
-    "message_type": "text",
-    "payload": {
-      "body": "Hello from Bhejna!"
-    }
-  }'`
-    },
-    {
-      lang: 'javascript',
-      label: 'Node.js',
-      code: `const response = await fetch('https://api.bhejna.com/v1/messages', {
-  method: 'POST',
-  headers: {
-    'X-API-Key': 'nxt_live_your_key',
-    'Content-Type': 'application/json'
-  },
-  body: JSON.stringify({
-    recipient: '+1234567890',
-    message_type: 'text',
-    payload: { body: 'Hello from Bhejna!' }
-  })
-});
-
-const data = await response.json();`
-    }
-  ]}
-/>
+<ApiEndpoint operationId="sendMessage" minimal={true} />
 
 ## Next Steps
 

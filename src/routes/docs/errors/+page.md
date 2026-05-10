@@ -2,8 +2,12 @@
 layout: docs
 ---
 
+
 <script>
-	import Callout from '$lib/components/docs/Callout.svelte';
+  import { schemas } from '$lib/generated/openapi';
+
+  import { ApiEndpoint, Callout, CodeGroup, SchemaTable } from '$docs';
+  import { DocsH1, DocsH2, DocsH3, DocsPre, DocsTable, DocsBlockquote, DocsUl, DocsOl } from '$docs/MDX';
 </script>
 
 # Error Reference
@@ -14,17 +18,7 @@ Bhejna uses standard HTTP status codes and a consistent JSON error schema to hel
 
 All error responses follow this structure:
 
-```json
-{
-  "success": false,
-  "error": {
-    "code": "ERROR_CODE",
-    "message": "Human readable explanation",
-    "retryable": false
-  },
-  "request_id": "req_123"
-}
-```
+<SchemaTable schema={schemas.ErrorResponse} title="Error Response Schema" />
 
 ## Common Error Codes
 
@@ -39,9 +33,7 @@ All error responses follow this structure:
 
 ## Rate Limits
 
-<Callout type="warning" title="Standard Limits">
-  By default, Bhejna allows up to **100 requests per second (RPS)** per API key. If you need a higher limit, please contact support.
-</Callout>
+<Callout type="warning" title="Standard Limits">By default, Bhejna allows up to **100 requests per second (RPS)** per API key. If you need a higher limit, please contact support.</Callout>
 
 When you exceed the rate limit, the API will return a `429 Too Many Requests` status. We include standard `RateLimit-*` headers in the response:
 
