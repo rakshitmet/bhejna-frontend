@@ -18,6 +18,8 @@
 		 * When the session changes, it calls 'invalidate', which re-runs the 
 		 * +layout.ts load function and forces the cookies to sync with the server.
 		 */
+		if (!supabase) return;
+
 		const { data: { subscription } } = supabase.auth.onAuthStateChange((event, _session) => {
 			if (_session?.access_token !== session?.access_token) {
 				invalidate('supabase:auth');

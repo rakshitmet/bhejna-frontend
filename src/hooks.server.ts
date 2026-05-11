@@ -1,60 +1,47 @@
-import { createServerClient } from '@supabase/ssr';
-import { PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_PUBLISHABLE_KEY } from '$env/static/public';
+import { createSupabaseServerClient } from '$lib/supabase/server';
 import type { Handle } from '@sveltejs/kit';
 import { sequence } from '@sveltejs/kit/hooks';
 import { paraglideMiddleware } from '$lib/paraglide/server';
 import { getTextDirection } from '$lib/paraglide/runtime';
 
 const handleSupabase: Handle = async ({ event, resolve }) => {
-	/**
-	 * Initialize Supabase server client.
-	 * We use the createServerClient from @supabase/ssr for robust cookie handling.
-	 */
-	event.locals.supabase = createServerClient(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_PUBLISHABLE_KEY, {
-		cookies: {
-			getAll() {
-				return event.cookies.getAll();
-			},
-			setAll(cookiesToSet) {
-				/**
-				 * Note: SvelteKit's resolve() will handle setting these cookies on the response
-				 * if we pass them through the event.cookies.set() calls.
-				 */
-				cookiesToSet.forEach(({ name, value, options }) =>
-					event.cookies.set(name, value, { 
-						...options, 
-						path: '/',
-						httpOnly: true,
-						sameSite: 'lax'
-					})
-				);
-			}
-		}
-	});
+    // 1. Inject the secure, per-request server client
+    event.locals.supabase = createSupabaseServerClient(event);
 
-	/**
-	 * Robust session retrieval via locals.safeGetSession().
-	 * This is the production-ready way to verify the user on the server.
-	 */
-	event.locals.safeGetSession = async () => {
-		// Fetch the cryptographically secure user
-		const { data: { user }, error } = await event.locals.supabase.auth.getUser();
+    // 2. Define the safe session fetcher
+    event.locals.safeGetSession = async () => {
+        const { data: { session } } = await event.locals.supabase.auth.getSession();
+        if (!session) {
+            return { session: null, user: null };
+        }
 
-		if (error || !user) {
-			return { session: null, user: null };
-		}
+        // Validate the token cryptographically
+        const { data: { user }, error } = await event.locals.supabase.auth.getUser();
+        
+        if (error) {
+            // Expected behavior if token is expired or malformed.
+            // We gracefully swallow the error to keep the terminal clean,
+            // and we tell Supabase to destroy the dead session cookies.
+            
+            // This forces the SSR client to clear the bad cookies in the user's browser
+            await event.locals.supabase.auth.signOut(); 
+            
+            return { session: null, user: null };
+        }
 
-		// Instead of getting the session and triggering the warning, we return the verified user.
-		// If your SvelteKit types require a session object, mock the necessary parts or fetch it ONLY if getUser succeeds.
-		const { data: { session } } = await event.locals.supabase.auth.getSession();
-		return { session, user };
-	};
+        return { session, user };
+    };
 
-	return resolve(event, {
-		filterSerializedResponseHeaders(name) {
-			return name === 'content-range';
-		}
-	});
+    // 3. Populate locals for downstream usage
+    const { session, user } = await event.locals.safeGetSession();
+    event.locals.session = session;
+    event.locals.user = user;
+
+    return resolve(event, {
+        filterSerializedResponseHeaders(name) {
+            return name === 'content-range' || name === 'x-supabase-api-version';
+        },
+    });
 };
 
 const handleParaglide: Handle = ({ event, resolve }) =>

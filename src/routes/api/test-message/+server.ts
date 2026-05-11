@@ -1,21 +1,7 @@
 import { json, type RequestEvent } from '@sveltejs/kit';
 import { bhejnaClient } from '$lib/api/client';
-import { PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_PUBLISHABLE_KEY } from '$env/static/public';
-import { createClient } from '@supabase/supabase-js';
 
-// Helper to get an authenticated Supabase client on the server
-function getSupabase(cookies: any) {
-    const token = cookies.get('sb-access-token');
-    
-    return createClient(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_PUBLISHABLE_KEY, {
-        auth: { persistSession: false },
-        global: {
-            headers: token ? { Authorization: `Bearer ${token}` } : {}
-        }
-    });
-}
-
-export const POST = async ({ request, cookies }: RequestEvent): Promise<Response> => {
+export const POST = async ({ request, locals }: RequestEvent): Promise<Response> => {
 	try {
 		const { recipient_phone } = await request.json();
 
@@ -23,15 +9,15 @@ export const POST = async ({ request, cookies }: RequestEvent): Promise<Response
 			return json({ message: 'Missing recipient_phone' }, { status: 400 });
 		}
 
-		const supabase = getSupabase(cookies);
-		const { data: { user }, error: userError } = await supabase.auth.getUser();
+		// 1. Enterprise Auth Guard: Use the protected session fetcher from hooks.server.ts
+		const { user } = await locals.safeGetSession();
 
-		if (userError || !user) {
+		if (!user) {
 			return json({ message: 'Unauthorized' }, { status: 401 });
 		}
 
-		// Fetch the tenant record to get the API Key and phone_number_id
-		const { data: tenant, error: tenantError } = await supabase
+		// 2. Fetch the tenant record using the injected, secure supabase client
+		const { data: tenant, error: tenantError } = await locals.supabase
 			.from('tenants')
 			.select('api_key, phone_number_id')
 			.eq('user_id', user.id)
@@ -41,9 +27,9 @@ export const POST = async ({ request, cookies }: RequestEvent): Promise<Response
 			return json({ message: 'Tenant configuration not found' }, { status: 404 });
 		}
 
-		// 4. Proxy request to the Go backend infrastructure
+		// 3. Proxy request to the Go backend infrastructure
 		const cleanPhone = recipient_phone.replace(/^\+|^00/, '');
-		
+
 		const data = await bhejnaClient.request('sendMessage', {
 			apiKey: tenant.api_key,
 			body: {
@@ -59,8 +45,8 @@ export const POST = async ({ request, cookies }: RequestEvent): Promise<Response
 				}
 			}
 		});
-		
-		// Return the Go backend's response (Job ID) to the frontend
+
+		// 4. Return the Go backend's response (Job ID) to the frontend
 		return json(data);
 	} catch (error: any) {
 		console.error('Test message proxy error:', error);

@@ -1,10 +1,12 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
-	import { supabase } from '$lib/supabase';
+
+	let { data } = $props();
 
 	onMount(async () => {
-		const { data: { user } } = await supabase.auth.getUser();
+		if (!data.supabase) return;
+		const { data: { user } } = await data.supabase.auth.getUser();
 		if (user) {
 			goto('/dashboard');
 		} else {

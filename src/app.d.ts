@@ -1,26 +1,23 @@
 import { SupabaseClient, Session, User } from '@supabase/supabase-js';
 
 declare global {
-	namespace App {
-		// interface Error {}
-		interface Locals {
-			supabase: SupabaseClient;
-			safeGetSession: () => Promise<{ session: Session | null; user: User | null }>;
-			session: Session | null;
-			user: User | null;
-		}
-		interface PageData {
-			session: Session | null;
-			cookies: { name: string; value: string }[];
-		}
-		// interface PageState {}
-		// interface Platform {}
-	}
+    namespace App {
+        interface Locals {
+            supabase: SupabaseClient;
+            safeGetSession: () => Promise<{ session: Session | null; user: User | null }>;
+            user: User | null;
+            session: Session | null;
+        }
+        interface PageData {
+            session: Session | null;
+            user: User | null;
+        }
+    }
 
-	interface Window {
-		fbAsyncInit: () => void;
-		FB: any;
-	}
+    interface Window {
+        fbAsyncInit: () => void;
+        FB: any;
+    }
 }
 
 export {};

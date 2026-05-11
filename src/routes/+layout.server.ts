@@ -1,8 +1,9 @@
 import { redirect } from '@sveltejs/kit';
 import type { LayoutServerLoad } from './$types';
 
-export const load: LayoutServerLoad = async ({ locals: { safeGetSession }, url, cookies }) => {
-	const { session, user } = await safeGetSession();
+export const load: LayoutServerLoad = async ({ locals, url, depends }) => {
+    depends('supabase:auth');
+	const { session, user } = await locals.safeGetSession();
 
 	if (!session && url.pathname.startsWith('/dashboard')) {
 		throw redirect(303, '/login');
@@ -14,7 +15,6 @@ export const load: LayoutServerLoad = async ({ locals: { safeGetSession }, url, 
 
 	return {
 		session,
-		user,
-		cookies: cookies.getAll()
+		user
 	};
 };
