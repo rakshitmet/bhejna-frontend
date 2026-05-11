@@ -32,7 +32,7 @@ class BhejnaClient {
 			throw new Error(`Unknown operationId: ${operationId}`);
 		}
 
-		let urlPath = op.path;
+		let urlPath: string = op.path;
 
 		// 1. Path parameters
 		if (params.path) {
@@ -59,7 +59,8 @@ class BhejnaClient {
 		};
 
 		// 4. Authentication
-		if (op.tags?.includes('Internal') || op.security?.some((s: any) => s.InternalAuth)) {
+		const opAny = op as any;
+		if (opAny.tags?.includes('Internal') || opAny.security?.some((s: any) => s.InternalAuth)) {
 			headers['Authorization'] = `Bearer ${this.internalSecret}`;
 		} else if (params.apiKey) {
 			// Align with OpenAPI spec (X-API-Key) but maintain legacy compatibility (Authorization)

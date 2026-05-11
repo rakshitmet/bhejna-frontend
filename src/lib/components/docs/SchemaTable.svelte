@@ -60,14 +60,15 @@
 	<div class="space-y-3">
 		{#if schema?.properties}
 			{#each Object.entries(schema.properties) as [name, prop]}
+				{@const typedProp = prop as any}
 				<div class="group relative flex flex-col p-4 rounded-xl border border-slate-800/60 bg-slate-900/10 hover:bg-slate-900/30 transition-colors">
 					<div class="flex items-center justify-between mb-2">
 						<div class="flex items-center gap-2">
 							<code class="text-cyan-400 font-bold text-sm tracking-tight">{name}</code>
 							<span class="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-500 uppercase font-bold font-mono">
-								{getTypeLabel(prop)}
-								{#if prop.format}
-									<span class="ml-1 opacity-50">({prop.format})</span>
+								{getTypeLabel(typedProp)}
+								{#if typedProp.format}
+									<span class="ml-1 opacity-50">({typedProp.format})</span>
 								{/if}
 							</span>
 						</div>
@@ -80,29 +81,29 @@
 						</div>
 					</div>
 
-					{#if prop.description}
-						<p class="text-sm text-slate-400 m-0 leading-relaxed">{prop.description}</p>
+					{#if typedProp.description}
+						<p class="text-sm text-slate-400 m-0 leading-relaxed">{typedProp.description}</p>
 					{/if}
 
-					{#if prop.enum}
+					{#if typedProp.enum}
 						<div class="mt-3 flex flex-wrap gap-1.5">
-							{#each prop.enum as val}
+							{#each typedProp.enum as val}
 								<code class="text-[10px] px-1.5 py-0.5 rounded bg-cyan-500/5 text-cyan-400/70 border border-cyan-500/10">"{val}"</code>
 							{/each}
 						</div>
 					{/if}
 
-					{#if prop.pattern}
+					{#if typedProp.pattern}
 						<div class="mt-2 flex items-center gap-2 text-[10px] text-slate-600 font-mono">
 							<Hash size={10} />
-							<span>Regex: <code>{prop.pattern}</code></span>
+							<span>Regex: <code>{typedProp.pattern}</code></span>
 						</div>
 					{/if}
 
 					<!-- Nested Objects (Recursive) -->
-					{#if prop.properties}
+					{#if typedProp.properties}
 						<div class="mt-4 pl-4 border-l border-slate-800">
-							<SchemaTableSelf schema={prop} level={level + 1} />
+							<SchemaTableSelf schema={typedProp} level={level + 1} />
 						</div>
 					{/if}
 				</div>
