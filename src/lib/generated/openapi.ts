@@ -2,12 +2,6 @@
 /* eslint-disable */
 // @ts-nocheck
 
-/**
- * API Operations indexed by operationId.
- * Webhooks are also included here (with isWebhook: true) for uniform ApiEndpoint resolution.
- * 
- * Import this file from .svelte components in docs pages (csr=false, prerender=true).
- */
 export const operations = {
   "forceGenerateWebhookType": {
     "path": "/v1/internal/webhook-schema",
@@ -389,6 +383,9 @@ export const operations = {
                   "webhook_url": {
                     "type": "string"
                   },
+                  "webhook_secret": {
+                    "type": "string"
+                  },
                   "created_at": {
                     "type": "string",
                     "format": "date-time"
@@ -431,6 +428,9 @@ export const operations = {
                         "type": "boolean"
                       },
                       "webhook_url": {
+                        "type": "string"
+                      },
+                      "webhook_secret": {
                         "type": "string"
                       },
                       "created_at": {
@@ -640,10 +640,6 @@ export const operations = {
     }
   }
 } as const;
-
-/**
- * API Webhooks indexed by webhook key (e.g. "delivery_update")
- */
 export const webhooks = {
   "delivery_update": {
     "post": {
@@ -801,10 +797,6 @@ export const webhooks = {
     }
   }
 } as const;
-
-/**
- * Common Schema Definitions (extracted from OpenAPI components.schemas)
- */
 export const schemas = {
   "MessageType": {
     "type": "string",
@@ -910,6 +902,9 @@ export const schemas = {
         "type": "boolean"
       },
       "webhook_url": {
+        "type": "string"
+      },
+      "webhook_secret": {
         "type": "string"
       },
       "created_at": {

@@ -24,8 +24,7 @@
 			title: 'Authentication',
 			icon: Key,
 			items: [
-				{ label: 'API Keys', href: '/docs/authentication' },
-				{ label: 'Internal Auth', href: '/docs/internal-auth' }
+				{ label: 'API Keys', href: '/docs/authentication' }
 			]
 		},
 		{
@@ -33,7 +32,6 @@
 			icon: Terminal,
 			items: [
 				{ label: 'Send Message', href: '/docs/api-reference/send-message' },
-				{ label: 'Management API', href: '/docs/api-reference/management' },
 				{ label: 'Status Codes', href: '/docs/api-reference/status-codes' }
 			]
 		},
@@ -76,8 +74,8 @@
 						href={item.href}
 						class="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg transition-all 
 							{isActive(item.href) 
-								? 'bg-cyan-500/10 text-cyan-400 border-l-2 border-cyan-500 pl-4' 
-								: 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40'}"
+								? 'bg-[#2563EB]/10 text-[#2563EB] border-l-2 border-[#2563EB] pl-4' 
+								: 'text-slate-400 hover:text-slate-200 hover:bg-[#111827]/80'}"
 					>
 						{item.label}
 					</a>

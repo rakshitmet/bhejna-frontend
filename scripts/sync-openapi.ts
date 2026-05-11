@@ -7,7 +7,7 @@ import { compileOpenAPI } from '../src/lib/utils/openapi-compiler.js';
  * to the frontend documentation platform.
  */
 async function syncOpenAPI() {
-	const backendSpecPath = '/home/rakshitbhai/bhejna/docs/openapi.yaml';
+	const backendSpecPath = '/home/rakshitbhai/bhejna/internal/api/spec/openapi.yaml';
 	const frontendSpecDir = path.resolve('static/openapi');
 	const frontendSpecPath = path.join(frontendSpecDir, 'openapi.yaml');
 

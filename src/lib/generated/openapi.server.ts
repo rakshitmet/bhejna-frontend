@@ -2,9 +2,6 @@
 /* eslint-disable */
 // @ts-nocheck
 
-/**
- * The complete, resolved OpenAPI specification
- */
 export const spec = {
   "openapi": "3.0.3",
   "info": {
@@ -13,12 +10,12 @@ export const spec = {
     "version": "1.0.0",
     "contact": {
       "name": "CodeNxt Lab",
-      "url": "https://codenxtlab.com"
+      "url": "https://codenxtlab.tech"
     }
   },
   "servers": [
     {
-      "url": "https://api.bhejna.com",
+      "url": "https://api.bhejna.codenxtlab.tech",
       "description": "Production Server"
     }
   ],
@@ -154,6 +151,9 @@ export const spec = {
             "type": "boolean"
           },
           "webhook_url": {
+            "type": "string"
+          },
+          "webhook_secret": {
             "type": "string"
           },
           "created_at": {
@@ -735,6 +735,9 @@ export const spec = {
                       "webhook_url": {
                         "type": "string"
                       },
+                      "webhook_secret": {
+                        "type": "string"
+                      },
                       "created_at": {
                         "type": "string",
                         "format": "date-time"
@@ -777,6 +780,9 @@ export const spec = {
                             "type": "boolean"
                           },
                           "webhook_url": {
+                            "type": "string"
+                          },
+                          "webhook_secret": {
                             "type": "string"
                           },
                           "created_at": {
@@ -988,10 +994,6 @@ export const spec = {
     }
   }
 } as const;
-
-/**
- * API Operations indexed by operationId (includes webhooks for uniform ApiEndpoint access)
- */
 export const operations = {
   "forceGenerateWebhookType": {
     "path": "/v1/internal/webhook-schema",
@@ -1373,6 +1375,9 @@ export const operations = {
                   "webhook_url": {
                     "type": "string"
                   },
+                  "webhook_secret": {
+                    "type": "string"
+                  },
                   "created_at": {
                     "type": "string",
                     "format": "date-time"
@@ -1415,6 +1420,9 @@ export const operations = {
                         "type": "boolean"
                       },
                       "webhook_url": {
+                        "type": "string"
+                      },
+                      "webhook_secret": {
                         "type": "string"
                       },
                       "created_at": {
@@ -1624,10 +1632,6 @@ export const operations = {
     }
   }
 } as const;
-
-/**
- * API Webhooks indexed by webhook key (e.g. "delivery_update")
- */
 export const webhooks = {
   "delivery_update": {
     "post": {
@@ -1785,10 +1789,6 @@ export const webhooks = {
     }
   }
 } as const;
-
-/**
- * Common Schema Definitions
- */
 export const schemas = (spec.components?.schemas || {}) as const;
 
 export type OperationId = keyof typeof operations;

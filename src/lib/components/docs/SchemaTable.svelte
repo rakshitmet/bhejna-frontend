@@ -8,7 +8,7 @@
 		description?: string;
 		enum?: any[];
 		items?: any;
-		properties?: Record<string, any>;
+		properties?: Record<string, SchemaProperty>;
 		required?: string[];
 		format?: string;
 		pattern?: string;

@@ -1,6 +1,6 @@
 import { json } from '@sveltejs/kit';
 import type { RequestEvent } from './$types';
-import { BHEJNA_GO_BACKEND_URL, BHEJNA_INTERNAL_SECRET } from '$env/static/private';
+import { bhejnaClient } from '$lib/api/client';
 import crypto from 'crypto';
 
 export const POST = async ({ request, locals }: RequestEvent): Promise<Response> => {
@@ -56,27 +56,8 @@ export const POST = async ({ request, locals }: RequestEvent): Promise<Response>
             created_at: newTenant.created_at || new Date().toISOString()
         };
 
-        const syncUrl = new URL('/v1/internal/tenant', BHEJNA_GO_BACKEND_URL).toString();
-        
         try {
-            const syncResponse = await fetch(syncUrl, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${BHEJNA_INTERNAL_SECRET}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(goPayload)
-            });
-
-            if (!syncResponse.ok) {
-                const errorText = await syncResponse.text();
-                console.error(`Go Backend Sync Failed: ${syncResponse.status} - ${errorText}`);
-                // Soft success: Supabase saved, but Go sync failed. SURVIVE and log.
-                return json({ 
-                    tenant: newTenant, 
-                    message: 'Tenant provisioned in database. Edge sync pending.' 
-                });
-            }
+            await bhejnaClient.syncTenant(goPayload);
         } catch (fetchError) {
             console.error('Data Plane Connection Error:', fetchError);
             // Soft success: Connection failed, but the data exists in Supabase.

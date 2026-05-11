@@ -8,8 +8,8 @@
 	let isSignUp = $state(false);
 </script>
 
-<div class="min-h-screen flex items-center justify-center bg-slate-950 p-4">
-	<div class="w-full max-w-md bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl p-8 space-y-6">
+<div class="min-h-screen flex items-center justify-center bg-slate-900 p-4">
+	<div class="w-full max-w-md bg-slate-800 border border-slate-700 rounded-2xl shadow-2xl p-8 space-y-6">
 		<div class="text-center">
 			<img src="/favicon.svg" alt="Bhejna Logo" class="w-16 h-16 mx-auto mb-4" />
 			<h1 class="text-3xl font-bold text-white tracking-tight">Bhejna</h1>
@@ -35,7 +35,7 @@
 					name="email"
 					value={form?.email ?? ''}
 					required
-					class="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-cyan-500 focus:border-transparent outline-none transition-all"
+					class="w-full bg-slate-900/50 border border-slate-700 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
 					placeholder="name@company.com"
 				/>
 			</div>
@@ -47,7 +47,7 @@
 					id="password"
 					name="password"
 					required
-					class="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-cyan-500 focus:border-transparent outline-none transition-all"
+					class="w-full bg-slate-900/50 border border-slate-700 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
 					placeholder="••••••••"
 				/>
 			</div>
@@ -55,7 +55,7 @@
 			<button
 				type="submit"
 				disabled={loading}
-				class="w-full bg-cyan-600 hover:bg-cyan-500 text-white font-semibold py-2 rounded-lg transition-colors shadow-lg shadow-cyan-900/20 disabled:opacity-50"
+				class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-lg transition-all shadow-lg shadow-blue-900/20 disabled:opacity-50"
 			>
 				{loading ? 'Processing...' : isSignUp ? 'Create Account' : 'Sign In'}
 			</button>
@@ -67,10 +67,10 @@
 			</p>
 		{/if}
 
-		<div class="text-center pt-4 border-t border-slate-800 space-y-3">
+		<div class="text-center pt-4 border-t border-slate-700 space-y-3">
 			<button
 				onclick={() => (isSignUp = !isSignUp)}
-				class="w-full text-sm text-slate-400 hover:text-cyan-400 transition-colors underline underline-offset-4"
+				class="w-full text-sm text-slate-400 hover:text-blue-400 transition-colors underline underline-offset-4"
 			>
 				{isSignUp ? 'Already have an account? Sign In' : "Don't have an account? Sign Up"}
 			</button>

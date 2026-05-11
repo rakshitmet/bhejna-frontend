@@ -1,6 +1,6 @@
 import { fail, redirect } from '@sveltejs/kit';
 import type { ServerLoadEvent, RequestEvent } from '@sveltejs/kit';
-import { BHEJNA_GO_BACKEND_URL, BHEJNA_INTERNAL_SECRET } from '$env/static/private';
+import { bhejnaClient } from '$lib/api/client';
 import { randomBytes } from 'crypto';
 
 export const load = async ({ locals }: ServerLoadEvent) => {
@@ -97,26 +97,7 @@ export const actions = {
         };
 
         try {
-            const syncUrl = new URL('/v1/internal/tenant', BHEJNA_GO_BACKEND_URL).toString();
-            const syncResponse = await fetch(syncUrl, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${BHEJNA_INTERNAL_SECRET}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(goPayload)
-            });
-
-            if (!syncResponse.ok) {
-                const errorText = await syncResponse.text();
-                console.error("Go Sync Failed:", errorText);
-                return { 
-                    success: true, 
-                    message: "Webhook saved. Edge sync pending.",
-                    webhook_url: updatedTenant.webhook_url, 
-                    webhook_secret: updatedTenant.webhook_secret 
-                };
-            }
+            await bhejnaClient.syncTenant(goPayload);
         } catch (syncErr: any) {
             console.error('Data Plane Communication Error:', syncErr);
             return { 
@@ -127,11 +108,49 @@ export const actions = {
             };
         }
 
-        return { 
-            success: true, 
-            message: "Webhook saved and synchronized.",
-            webhook_url: updatedTenant.webhook_url, 
-            webhook_secret: updatedTenant.webhook_secret 
-        };
-    }
+		return { 
+			success: true, 
+			message: "Webhook saved and synchronized.",
+			webhook_url: updatedTenant.webhook_url, 
+			webhook_secret: updatedTenant.webhook_secret 
+		};
+	},
+	rotateSecret: async ({ locals }: RequestEvent) => {
+		const { session, user } = await locals.safeGetSession();
+		if (!session || !user) return fail(401, { message: 'Unauthorized' });
+
+		const newSecret = randomBytes(16).toString('hex');
+		const { data: updatedTenant, error: updateError } = await locals.supabase
+			.from('tenants')
+			.update({ webhook_secret: newSecret })
+			.eq('user_id', user.id)
+			.select()
+			.single();
+
+		if (updateError || !updatedTenant) {
+			return fail(500, { message: "Failed to rotate secret" });
+		}
+
+		// Go Sync
+		const goPayload = {
+			id: updatedTenant.id,
+			waba_id: updatedTenant.waba_id?.trim() || "",
+			phone_number_id: updatedTenant.phone_number_id?.trim() || "",
+			api_key: updatedTenant.api_key?.trim() || "",
+			messaging_limit: Number(updatedTenant.messaging_limit) || 250,
+			quality_rating: updatedTenant.quality_rating || "GREEN",
+			is_paused: Boolean(updatedTenant.is_paused),
+			webhook_url: updatedTenant.webhook_url?.trim() || "",
+			webhook_secret: updatedTenant.webhook_secret?.trim() || "",
+			created_at: updatedTenant.created_at || new Date().toISOString()
+		};
+
+		try {
+			await bhejnaClient.syncTenant(goPayload);
+		} catch (err) {
+			console.error("Go Sync Error during rotation:", err);
+		}
+
+		return { success: true, message: "Webhook secret rotated successfully." };
+	}
 };

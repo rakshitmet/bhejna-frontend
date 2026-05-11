@@ -1,5 +1,5 @@
 import { json, type RequestEvent } from '@sveltejs/kit';
-import { BHEJNA_GO_BACKEND_URL } from '$env/static/private';
+import { bhejnaClient } from '$lib/api/client';
 import { PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_PUBLISHABLE_KEY } from '$env/static/public';
 import { createClient } from '@supabase/supabase-js';
 
@@ -44,13 +44,9 @@ export const POST = async ({ request, cookies }: RequestEvent): Promise<Response
 		// 4. Proxy request to the Go backend infrastructure
 		const cleanPhone = recipient_phone.replace(/^\+|^00/, '');
 		
-		const response = await fetch(`${BHEJNA_GO_BACKEND_URL}/v1/messages`, {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-				'Authorization': `Bearer ${tenant.api_key}`
-			},
-			body: JSON.stringify({
+		const data = await bhejnaClient.request('sendMessage', {
+			apiKey: tenant.api_key,
+			body: {
 				recipient: cleanPhone,
 				message_type: "template",
 				payload: {
@@ -61,16 +57,8 @@ export const POST = async ({ request, cookies }: RequestEvent): Promise<Response
 						}
 					}
 				}
-			})
+			}
 		});
-
-		if (!response.ok) {
-			const errorText = await response.text();
-			console.error(`Go Validation Error: ${errorText}`);
-			return json({ error: errorText }, { status: response.status });
-		}
-
-		const data = await response.json();
 		
 		// Return the Go backend's response (Job ID) to the frontend
 		return json(data);

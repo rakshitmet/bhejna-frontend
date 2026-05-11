@@ -1,12 +1,3 @@
----
-layout: docs
----
-<script>
-  import { ApiEndpoint, Callout, CodeGroup, SchemaTable } from '$docs';
-  import { DocsH1, DocsH2, DocsH3, DocsPre, DocsTable, DocsBlockquote, DocsUl, DocsOl } from '$docs/MDX';
-</script>
-
-
 # Internal Authentication
 
 This section covers authentication for internal Bhejna microservices and management operations.

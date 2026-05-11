@@ -1,0 +1,68 @@
+openapi: 3.0.3
+info:
+  title: Bhejna Internal API
+  description: |
+    Internal control-plane endpoints for communication between the SvelteKit frontend and the Go backend.
+  version: 1.0.0
+
+tags:
+  - name: Internal
+    description: System administration and sync operations
+
+paths:
+  /v1/internal/webhook-schema:
+    post:
+      operationId: forceGenerateWebhookType
+      description: "Internal shadow endpoint to force generation of WebhookPayload type."
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: 'openapi.yaml#/components/schemas/WebhookPayload'
+
+  /v1/internal/tenant:
+    post:
+      operationId: syncTenant
+      tags:
+        - Internal
+      summary: Sync or provision a tenant
+      description: Internal endpoint to provision or update tenant configuration.
+      security:
+        - InternalAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: 'openapi.yaml#/components/schemas/Tenant'
+                - type: object
+                  required:
+                    - record
+                  properties:
+                    record:
+                      $ref: 'openapi.yaml#/components/schemas/Tenant'
+      responses:
+        '200':
+          description: Tenant synced successfully
+
+  /v1/internal/tenants/{id}/pause:
+    put:
+      operationId: pauseTenant
+      tags:
+        - Internal
+      summary: Pause a tenant
+      description: Manually pause message delivery for a tenant.
+      security:
+        - InternalAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Tenant paused successfully
