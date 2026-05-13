@@ -1,6 +1,7 @@
 import { fail, redirect } from '@sveltejs/kit';
 import type { ServerLoadEvent, RequestEvent } from '@sveltejs/kit';
-import { bhejnaClient } from '$lib/api/client';
+import { syncTenant } from '$lib/api/generated/client';
+import type { SyncTenantBody } from '$lib/api/generated/models';
 import { randomBytes } from 'crypto';
 
 export const load = async ({ locals }: ServerLoadEvent) => {
@@ -97,7 +98,7 @@ export const actions = {
         };
 
         try {
-            await bhejnaClient.syncTenant(goPayload);
+            await syncTenant(goPayload);
         } catch (syncErr: any) {
             console.error('Data Plane Communication Error:', syncErr);
             return { 
@@ -146,7 +147,7 @@ export const actions = {
 		};
 
 		try {
-			await bhejnaClient.syncTenant(goPayload);
+			await syncTenant(goPayload);
 		} catch (err) {
 			console.error("Go Sync Error during rotation:", err);
 		}

@@ -15,7 +15,10 @@
 		"lint": "prettier --check . && eslint .",
 		"format": "prettier --write .",
 		"sync:openapi": "tsx scripts/sync-openapi.ts",
-		"generate:api": "tsx src/lib/utils/openapi-compiler.ts"
+		"generate:api": "tsx src/lib/utils/openapi-compiler.ts",
+		"api:fetch": "mkdir -p src/lib/api && curl -o src/lib/api/openapi.yaml https://raw.githubusercontent.com/codenxtlab/bhejna/main/internal/api/spec/openapi.yaml && sed -i 's/openapi: 3.0.3/openapi: 3.1.0/' src/lib/api/openapi.yaml",
+		"api:generate": "orval --config orval.config.ts",
+		"api:sync": "npm run api:fetch && npm run api:generate"
 	},
 	"devDependencies": {
 		"@apidevtools/json-schema-ref-parser": "^15.3.5",
@@ -36,6 +39,7 @@
 		"globals": "^17.4.0",
 		"lucide-svelte": "^1.0.1",
 		"mdsvex": "^0.12.7",
+		"orval": "^8.9.1",
 		"prettier": "^3.8.1",
 		"prettier-plugin-svelte": "^3.5.1",
 		"prettier-plugin-tailwindcss": "^0.7.2",
@@ -51,8 +55,11 @@
 		"vite": "^8.0.7"
 	},
 	"dependencies": {
+		"@scalar/api-reference": "^1.55.3",
+		"@scalar/sveltekit": "^0.2.14",
 		"@supabase/ssr": "^0.10.3",
 		"@supabase/supabase-js": "^2.105.4",
-		"js-yaml": "^4.1.1"
+		"js-yaml": "^4.1.1",
+		"zod": "^4.4.3"
 	}
 }

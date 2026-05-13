@@ -79,7 +79,7 @@
 		if (samples.length === 0 && !isWebhook && op?.path) {
 			const body = requestExample ? ` \\\n  -d '${JSON.stringify(requestExample, null, 2)}'` : '';
 			const curl =
-				`curl -X ${op.method} "https://api.bhejna.com${op.path}" \\\n` +
+				`curl -X ${op.method} "https://api.bhejna.codenxtlab.tech/v1${op.path}" \\\n` +
 				`  -H "Authorization: Bearer YOUR_API_KEY" \\\n` +
 				`  -H "Content-Type: application/json"` +
 				body;
