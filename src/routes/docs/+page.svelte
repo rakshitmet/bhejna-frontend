@@ -1,8 +1,15 @@
 <script lang="ts">
-	import { ApiEndpoint, Callout, CodeGroup, SchemaTable } from '$lib/components/docs';
-	import { Terminal, Shield, Zap, Activity, Webhook, BookOpen, Code } from 'lucide-svelte';
+	import { Terminal, Shield, Zap, Activity, Webhook, BookOpen, Code, Info, AlertTriangle, Copy, Check } from 'lucide-svelte';
 
 	// The registry (operations) is already synchronized with the YAML via the compiler.
+	
+	let copiedId = $state<string | null>(null);
+
+	async function copyToClipboard(text: string, id: string) {
+		await navigator.clipboard.writeText(text);
+		copiedId = id;
+		setTimeout(() => (copiedId = null), 2000);
+	}
 </script>
 
 <div class="min-h-screen bg-[#020617] text-slate-300 selection:bg-cyan-500/30 selection:text-cyan-200">
@@ -43,18 +50,37 @@
 
 			<div class="bg-slate-900/40 rounded-3xl border border-slate-800/60 p-8">
 				<h3 class="text-sm font-bold text-slate-500 uppercase tracking-widest mb-4">Authorization Header</h3>
-				<CodeGroup
-					examples={[{
-						lang: 'bash',
-						label: 'Header',
-						code: 'Authorization: Bearer nxt_live_YOUR_API_KEY'
-					}]}
-				/>
 				
-				<div class="mt-8">
-					<Callout type="warning" title="Security Requirement">
-						Ensure your API key is kept secret. Do not expose it in client-side code or public repositories. Requests over non-HTTPS connections will be rejected.
-					</Callout>
+				<div class="rounded-xl border border-slate-800 bg-[#0f172a] overflow-hidden">
+					<div class="flex items-center justify-between px-4 py-2 bg-slate-900/50 border-b border-slate-800">
+						<div class="flex items-center gap-2">
+							<Terminal size={12} class="text-slate-400" />
+							<span class="text-xs font-semibold text-slate-300">Header</span>
+						</div>
+						<button 
+							onclick={() => copyToClipboard('Authorization: Bearer nxt_live_YOUR_API_KEY', 'auth')}
+							class="p-2 text-slate-500 hover:text-white transition-colors rounded-lg"
+						>
+							{#if copiedId === 'auth'}
+								<Check size={14} class="text-green-500" />
+							{:else}
+								<Copy size={14} />
+							{/if}
+						</button>
+					</div>
+					<pre class="p-6 overflow-x-auto"><code class="text-sm font-mono text-slate-300">Authorization: Bearer nxt_live_YOUR_API_KEY</code></pre>
+				</div>
+				
+				<div class="mt-8 flex gap-4 p-5 rounded-xl border border-amber-500/20 bg-amber-500/5">
+					<div class="shrink-0 mt-0.5">
+						<AlertTriangle size={20} class="text-amber-500" />
+					</div>
+					<div>
+						<h5 class="mt-0 mb-1 font-bold text-slate-200">Security Requirement</h5>
+						<p class="text-sm leading-relaxed text-slate-400">
+							Ensure your API key is kept secret. Do not expose it in client-side code or public repositories. Requests over non-HTTPS connections will be rejected.
+						</p>
+					</div>
 				</div>
 			</div>
 		</section>
@@ -70,27 +96,39 @@
 				Send a template message instantly using cURL. This example uses the production endpoint and a standard WhatsApp template.
 			</p>
 
-			<CodeGroup
-				examples={[{
-					lang: 'bash',
-					label: 'Send Message',
-					code: `curl -X POST "https://api.bhejna.codenxtlab.tech/v1/messages" \\
-  -H "Authorization: Bearer YOUR_API_KEY" \\
-  -H "Content-Type: application/json" \\
-  -d '{
+			<div class="rounded-xl border border-slate-800 bg-[#0f172a] overflow-hidden">
+				<div class="flex items-center justify-between px-4 py-2 bg-slate-900/50 border-b border-slate-800">
+					<div class="flex items-center gap-2">
+						<Terminal size={12} class="text-slate-400" />
+						<span class="text-xs font-semibold text-slate-300">Send Message</span>
+					</div>
+					<button 
+						onclick={() => copyToClipboard('curl -X POST "https://api.bhejna.codenxtlab.tech/v1/messages" \\\n  -H "Authorization: Bearer YOUR_API_KEY" \\\n  -H "Content-Type: application/json" \\\n  -d \'{\n    "recipient": "+1234567890",\n    "message_type": "template",\n    "payload": {\n      "template": {\n        "name": "hello_world",\n        "language": {\n          "code": "en_US"\n        }\n      }\n    }\n  }\'', 'curl')}
+						class="p-2 text-slate-500 hover:text-white transition-colors rounded-lg"
+					>
+						{#if copiedId === 'curl'}
+							<Check size={14} class="text-green-500" />
+						{:else}
+							<Copy size={14} />
+						{/if}
+					</button>
+				</div>
+				<pre class="p-6 overflow-x-auto"><code class="text-sm font-mono text-slate-300">curl -X POST "https://api.bhejna.codenxtlab.tech/v1/messages" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '&lcub;
     "recipient": "+1234567890",
     "message_type": "template",
-    "payload": {
-      "template": {
+    "payload": &lcub;
+      "template": &lcub;
         "name": "hello_world",
-        "language": {
+        "language": &lcub;
           "code": "en_US"
-        }
-      }
-    }
-  }'`
-				}]}
-			/>
+        &rcub;
+      &rcub;
+    &rcub;
+  &rcub;'</code></pre>
+			</div>
 		</section>
 
 		<!-- API Reference -->
