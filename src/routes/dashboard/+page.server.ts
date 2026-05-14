@@ -1,5 +1,6 @@
 import { fail, redirect } from '@sveltejs/kit';
 import type { ServerLoadEvent, RequestEvent } from '@sveltejs/kit';
+import { BHEJNA_INTERNAL_SECRET } from '$env/static/private';
 import { syncTenant } from '$lib/api/generated/client';
 import type { SyncTenantBody as SyncTenantBodyType } from '$lib/api/generated/models';
 import { SyncTenantBody } from '$lib/api/generated/zod';
@@ -100,7 +101,11 @@ export const actions = {
 
         try {
             const parsedPayload = SyncTenantBody.parse(goPayload);
-            await syncTenant(parsedPayload);
+            await syncTenant(parsedPayload, {
+                headers: {
+                    Authorization: `Bearer ${BHEJNA_INTERNAL_SECRET}`
+                }
+            });
         } catch (syncErr: any) {
             console.error('Data Plane Communication Error:', syncErr);
             return { 
@@ -150,7 +155,11 @@ export const actions = {
 
 		try {
 			const parsedPayload = SyncTenantBody.parse(goPayload);
-			await syncTenant(parsedPayload);
+			await syncTenant(parsedPayload, {
+				headers: {
+					Authorization: `Bearer ${BHEJNA_INTERNAL_SECRET}`
+				}
+			});
 		} catch (err) {
 			console.error("Go Sync Error during rotation:", err);
 		}
