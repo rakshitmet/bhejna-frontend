@@ -1,6 +1,7 @@
 import { json } from '@sveltejs/kit';
 import type { RequestEvent } from './$types';
 import { syncTenant } from '$lib/api/generated/client';
+import { SyncTenantBody } from '$lib/api/generated/zod';
 import crypto from 'crypto';
 
 export const POST = async ({ request, locals }: RequestEvent): Promise<Response> => {
@@ -57,7 +58,8 @@ export const POST = async ({ request, locals }: RequestEvent): Promise<Response>
         };
 
         try {
-            await syncTenant(goPayload);
+            const parsedPayload = SyncTenantBody.parse(goPayload);
+            await syncTenant(parsedPayload);
         } catch (fetchError) {
             console.error('Data Plane Connection Error:', fetchError);
             // Soft success: Connection failed, but the data exists in Supabase.

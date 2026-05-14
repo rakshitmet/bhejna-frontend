@@ -11,6 +11,56 @@ import * as zod from 'zod';
 
 
 /**
+ * @summary Meta Webhook Verification
+ */
+export const GetV1MetaWebhookQueryParams = zod.object({
+  "hub.mode": zod.string(),
+  "hub.challenge": zod.string(),
+  "hub.verify_token": zod.string()
+})
+
+
+/**
+ * @summary Meta Webhook Payload Receiver
+ */
+export const PostV1MetaWebhookBody = zod.object({
+  "object": zod.string(),
+  "entry": zod.array(zod.object({
+  "id": zod.string().describe('WhatsApp Business Account ID'),
+  "changes": zod.array(zod.object({
+  "field": zod.string(),
+  "value": zod.object({
+  "messaging_product": zod.string().optional(),
+  "metadata": zod.object({
+  "display_phone_number": zod.string().optional(),
+  "phone_number_id": zod.string().optional()
+}).optional(),
+  "statuses": zod.array(zod.object({
+  "id": zod.string().optional(),
+  "status": zod.enum(['sent', 'delivered', 'read', 'failed', 'deleted']).optional(),
+  "timestamp": zod.string().optional(),
+  "recipient_id": zod.string().optional(),
+  "errors": zod.array(zod.object({
+  "code": zod.number().optional(),
+  "title": zod.string().optional()
+})).optional()
+})).optional(),
+  "messages": zod.array(zod.object({
+  "from": zod.string().optional(),
+  "id": zod.string().optional(),
+  "timestamp": zod.string().optional(),
+  "type": zod.string().optional(),
+  "text": zod.object({
+  "body": zod.string().optional()
+}).optional()
+})).optional()
+})
+}))
+}))
+})
+
+
+/**
  * Internal shadow endpoint to force generation of WebhookPayload type.
  */
 export const ForceGenerateWebhookTypeResponse = zod.object({

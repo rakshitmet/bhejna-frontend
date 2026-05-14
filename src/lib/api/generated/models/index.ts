@@ -10,6 +10,7 @@ It provides a contract-first API for sending messages, tracking delivery status,
 
 export * from './errorResponse';
 export * from './errorResponseError';
+export * from './getV1MetaWebhookParams';
 export * from './messageType';
 export * from './sendMessage202';
 export * from './sendMessageRequest';

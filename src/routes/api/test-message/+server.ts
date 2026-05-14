@@ -2,6 +2,7 @@ import { json } from '@sveltejs/kit';
 import type { RequestEvent } from '@sveltejs/kit';
 // Import the newly generated Orval function!
 import { sendMessage } from '$lib/api/generated/client'; 
+import { SendMessageBody } from '$lib/api/generated/zod';
 
 export const POST = async ({ request, locals }: RequestEvent): Promise<Response> => {
     try {
@@ -33,19 +34,23 @@ export const POST = async ({ request, locals }: RequestEvent): Promise<Response>
 
         // Orval exposes standard fetch options as the second argument, 
         // perfect for injecting our dynamic Bearer token!
-        const response = await sendMessage(
-            {
-                recipient: cleanPhone,
-                message_type: "template",
-                payload: {
-                    template: {
-                        name: "hello_world",
-                        language: {
-                            code: "en_US"
-                        }
+        const payload = {
+            recipient: cleanPhone,
+            message_type: "template",
+            payload: {
+                template: {
+                    name: "hello_world",
+                    language: {
+                        code: "en_US"
                     }
                 }
-            },
+            }
+        };
+
+        const parsedPayload = SendMessageBody.parse(payload);
+
+        const response = await sendMessage(
+            parsedPayload as any, // Cast to any to align with Orval generated type if needed, but it should be fully compatible
             {
                 headers: {
                     Authorization: `Bearer ${tenant.api_key}`

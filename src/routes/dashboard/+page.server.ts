@@ -1,7 +1,8 @@
 import { fail, redirect } from '@sveltejs/kit';
 import type { ServerLoadEvent, RequestEvent } from '@sveltejs/kit';
 import { syncTenant } from '$lib/api/generated/client';
-import type { SyncTenantBody } from '$lib/api/generated/models';
+import type { SyncTenantBody as SyncTenantBodyType } from '$lib/api/generated/models';
+import { SyncTenantBody } from '$lib/api/generated/zod';
 import { randomBytes } from 'crypto';
 
 export const load = async ({ locals }: ServerLoadEvent) => {
@@ -98,7 +99,8 @@ export const actions = {
         };
 
         try {
-            await syncTenant(goPayload);
+            const parsedPayload = SyncTenantBody.parse(goPayload);
+            await syncTenant(parsedPayload);
         } catch (syncErr: any) {
             console.error('Data Plane Communication Error:', syncErr);
             return { 
@@ -147,7 +149,8 @@ export const actions = {
 		};
 
 		try {
-			await syncTenant(goPayload);
+			const parsedPayload = SyncTenantBody.parse(goPayload);
+			await syncTenant(parsedPayload);
 		} catch (err) {
 			console.error("Go Sync Error during rotation:", err);
 		}

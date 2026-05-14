@@ -9,6 +9,7 @@ It provides a contract-first API for sending messages, tracking delivery status,
  */
 import type {
   ErrorResponse,
+  GetV1MetaWebhookParams,
   SendMessage202,
   SendMessageRequest,
   SyncTenantBody,
@@ -16,6 +17,93 @@ import type {
 } from './models';
 
 import { customFetch } from '../mutator';
+
+export type getV1MetaWebhookResponse200 = {
+  data: string
+  status: 200
+}
+
+export type getV1MetaWebhookResponse403 = {
+  data: void
+  status: 403
+}
+
+export type getV1MetaWebhookResponseSuccess = (getV1MetaWebhookResponse200) & {
+  headers: Headers;
+};
+export type getV1MetaWebhookResponseError = (getV1MetaWebhookResponse403) & {
+  headers: Headers;
+};
+
+export type getV1MetaWebhookResponse = (getV1MetaWebhookResponseSuccess | getV1MetaWebhookResponseError)
+
+export const getGetV1MetaWebhookUrl = (params: GetV1MetaWebhookParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/v1/meta/webhook?${stringifiedParams}` : `/v1/meta/webhook`
+}
+
+/**
+ * @summary Meta Webhook Verification
+ */
+export const getV1MetaWebhook = async (params: GetV1MetaWebhookParams, options?: RequestInit): Promise<getV1MetaWebhookResponse> => {
+
+  return customFetch<getV1MetaWebhookResponse>(getGetV1MetaWebhookUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+export type postV1MetaWebhookResponse200 = {
+  data: void
+  status: 200
+}
+
+export type postV1MetaWebhookResponseSuccess = (postV1MetaWebhookResponse200) & {
+  headers: Headers;
+};
+;
+
+export type postV1MetaWebhookResponse = (postV1MetaWebhookResponseSuccess)
+
+export const getPostV1MetaWebhookUrl = () => {
+
+
+
+
+  return `/v1/meta/webhook`
+}
+
+/**
+ * @summary Meta Webhook Payload Receiver
+ */
+export const postV1MetaWebhook = async (webhookPayload: WebhookPayload, options?: RequestInit): Promise<postV1MetaWebhookResponse> => {
+
+  return customFetch<postV1MetaWebhookResponse>(getPostV1MetaWebhookUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      webhookPayload,)
+  }
+);}
+
+
 
 export type forceGenerateWebhookTypeResponse200 = {
   data: WebhookPayload
